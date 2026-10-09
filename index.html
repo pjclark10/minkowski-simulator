@@ -19,11 +19,11 @@
         @media(min-width: 550px) and (max-width: 849px) { .plots { flex-direction: row; align-items: flex-start; } }
         .plot-container { text-align: center; width: 100%; max-width: 410px; }
         
-        /* HARDWARE-ACCELERATED HIGH-DPI CANVAS LAYERING */
+        /* HIGH-DPI SCALING POSITION WRAPPER */
         .canvas-touch-wrapper { width: 100%; height: auto; position: relative; }
-        canvas { background: #0b0b0d; border-radius: 8px; border: 2px solid #3d3d45; width: 100%; height: auto; aspect-ratio: 1/1; display: block; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+        canvas { background: #0b0b0d; border-radius: 8px; border: 2px solid #3d3d45; width: 100%; height: auto; aspect-ratio: 1/1; display: block; }
         
-        /* INVISIBLE MOBILE CURTAIN: Blocks drag captures on phones only, keeping desktop scaling crisp */
+        /* INVISIBLE MOBILE LAYER FOR PASS-THROUGH SWIPES */
         @media(max-width: 849px) {
             .canvas-touch-wrapper::after { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: transparent; z-index: 5; pointer-events: none; }
         }
