@@ -13,6 +13,8 @@ function arr(ctx,t1,x1,t2,x2,cl,w,lb=""){
 }
 function grid(ctx,S,bf,isMap){
     ctx.clearRect(0,0,W,H);
+    // Explicitly configure context rendering values for high-DPI desktop viewports
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
     if(isMap){
         for(let i=-12; i<=12; i++){
             let p1=mapCoord(-12*S,i*S),p2=mapCoord(12*S,i*S);
@@ -20,7 +22,6 @@ function grid(ctx,S,bf,isMap){
             ln(ctx,p1.x,p1.y,p2.x,p2.y,"#444452",1.5);ln(ctx,p3.x,p3.y,p4.x,p4.y,"#444452",1.5);
         }
     }else {
-        // FIXED SHEAR GEOMETRY: Force background lines to transform strictly with frame boost (-bf) to remain parallel to ct' and x'
         for(let i=-12; i<=12; i++){
             let l1=bst(-12,i,-bf),l2=bst(12,i,-bf),l3=bst(i,-12,-bf),l4=bst(i,12,-bf);
             let p1=mapCoord(l1.tP*S,l1.xP*S),p2=mapCoord(l2.tP*S,l2.xP*S);
@@ -68,6 +69,7 @@ function run(){
     let u0=1,u1=0,a0=0,a1=0;const g0=1/Math.sqrt(1-v*v);
     if(!isZeroA){let p_t=g0*v+a*targetT;let g_t=Math.sqrt(1+p_t*p_t);u0=g_t;u1=p_t;a0=a*u1;a1=a*u0;}else{u0=g0;u1=g0*v;}
     
+    const bU=bst(u0,u1,bf),bA=bst(a0,a1,bf);
     document.getElementById('gV').innerText=u0.toFixed(2);
     document.getElementById('uV').innerText="("+u0.toFixed(2)+"c, "+u1.toFixed(2)+"c)";document.getElementById('aV').innerText="("+a0.toFixed(2)+"a, "+a1.toFixed(2)+"a)";
     const dP=u0*a0-u1*a1;document.getElementById('dP').innerText=Math.abs(dP)<1e-10?"0.000":dP.toFixed(3);
@@ -99,7 +101,6 @@ function run(){
         arr(cM,py,px,py+a0*S*sm*0.015,px+a1*S*sm*0.015,"#4caf50",3.5,"A");
     }
     
-    // Right Plot (Laboratory Frame S Perspective Gauge Map)
     cG.strokeStyle="#00f0ff";cG.lineWidth=2.5;cG.beginPath();
     for(let xi=-3.0;xi<=3.0;xi+=0.04){
         let bShell=bst(Math.cosh(xi),Math.sinh(xi),0);
