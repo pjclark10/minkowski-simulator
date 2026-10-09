@@ -57,7 +57,6 @@
             let l3 = bst(i, -12, bf), l4 = bst(i, 12, bf);
             ctx.beginPath(); ctx.moveTo(OX + l3.xP*S, OY - l3.tP*S); ctx.lineTo(OX + l4.xP*S, OY - l4.tP*S); ctx.stroke();
         }
-        
         ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(0, OY); ctx.lineTo(W, OY); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(OX, 0); ctx.lineTo(OX, H); ctx.stroke();
@@ -98,7 +97,7 @@
         document.getElementById('rhoVal').innerText = isZeroA ? "Infinity" : (1 / Math.abs(a)).toFixed(2);
 
         const u0 = g, u1 = g * v;
-        const a0 = isZeroA ? 0 : g*g*g*g*a*v, a1 = g*g*g*g*a;
+        const a0 = isZeroA ? 0 : g*g*g*g*a*v, a1 = isZeroA ? 0 : g*g*g*g*a;
 
         const bU = bst(u0, u1, bf);
         const bA = bst(a0, a1, bf); 
@@ -113,28 +112,33 @@
         cM.strokeStyle = "#03dac6"; cM.lineWidth = 2.5; cM.beginPath(); cM.moveTo(OX, 0); cM.lineTo(OX, H); cM.stroke();
         arr(cM, OX, OY - 1.5*S, OX, OY - 2.5*S, "#03dac6", 2.5);
 
-        let px = OX, py = OY - 1.5*S;
+        // Core visual anchoring heights
+        const targetT = 1.5; 
+        let px = OX + (v * targetT) * S;
+        let py = OY - targetT * S;
+
         if (isZeroA) {
             cM.strokeStyle = "#cf6679"; cM.lineWidth = 3; cM.beginPath();
             cM.moveTo(OX - (v * 1.5)*S, OY); cM.lineTo(OX + (v * 4.5)*S, OY - 6*S); cM.stroke();
-            px = OX + (v * 1.5) * S; py = OY - 1.5 * S;
         } else {
-            // FIXED UNIFIED VELOCITY-ACCELERATION CURVE LOOP: Handles signs dynamically across all quadrants
+            // FIXED LABORATORY FRAME INTEGRATION: Sweeps cleanly through coordinate time to avoid hyperbolic scale clipping
             cM.strokeStyle = "#cf6679"; cM.lineWidth = 3; cM.beginPath();
-            const absA = Math.abs(a);
-            // Hyperbolic trajectory parametric offset shifting origin based on deceleration parameters
-            const trajectorySign = a >= 0 ? 1 : -1;
-            for(let t=-4; t<=8; t+=0.02) {
-                let gx = OX + (trajectorySign * (Math.cosh(absA*t)-1)/absA)*S;
-                let gy = OY - (Math.sinh(absA*t)/absA + 1.5)*S;
-                if(t===-4) cM.moveTo(gx, gy); else cM.lineTo(gx, gy);
+            
+            // Relativistic hyperbolic path baseline offset calculations
+            const t0 = v / a;
+            const x0 = (v * t0) - (Math.sqrt(1 + (a * t0) * (a * t0)) - 1) / a;
+
+            for(let t_grid = -1.5; t_grid <= 4.5; t_grid += 0.05) {
+                let dx = x0 + (Math.sqrt(1 + (a * t_grid) * (a * t_grid)) - 1) / a;
+                let canvasX = OX + dx * S;
+                let canvasY = OY - t_grid * S;
+                if(t_grid === -1.5) cM.moveTo(canvasX, canvasY); else cM.lineTo(canvasX, canvasY);
             }
             cM.stroke();
 
-            // FIXED POSITION MARKER MAP: Tracks perfectly across negative and positive directions dynamically
-            let currentTau = Math.atanh(v) / a;
-            px = OX + (trajectorySign * (Math.cosh(absA * currentTau) - 1) / absA) * S;
-            py = OY - (Math.sinh(absA * currentTau) / absA + 1.5) * S;
+            // Marker dot links up beautifully to your targeted velocity vector coordinates
+            px = OX + (x0 + (Math.sqrt(1 + (a * targetT) * (a * targetT)) - 1) / a) * S;
+            py = OY - targetT * S;
         }
 
         cM.fillStyle = "#fff"; cM.beginPath(); cM.arc(px, py, 5, 0, 2*Math.PI); cM.fill();
