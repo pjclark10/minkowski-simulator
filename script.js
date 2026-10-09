@@ -13,20 +13,12 @@ function arr(ctx,t1,x1,t2,x2,cl,w,lb=""){
 }
 function grid(ctx,S,bf,isMap){
     ctx.clearRect(0,0,W,H);
-    if(isMap){
-        for(let i=-12; i<=12; i++){
-            let p1=mapCoord(-12*S,i*S),p2=mapCoord(12*S,i*S);
-            let p3=mapCoord(i*S,-12*S),p4=mapCoord(i*S,12*S);
-            ln(ctx,p1.x,p1.y,p2.x,p2.y,"#444452",1.5);ln(ctx,p3.x,p3.y,p4.x,p4.y,"#444452",1.5);
-        }
-    }else {
-        // FIXED TRACKING: Background grid lines are locked completely to the frame boost (-bf)
-        for(let i=-12; i<=12; i++){
-            let l1=bst(-12,i,-bf),l2=bst(12,i,-bf),l3=bst(i,-12,-bf),l4=bst(i,12,-bf);
-            let p1=mapCoord(l1.tP*S,l1.xP*S),p2=mapCoord(l2.tP*S,l2.xP*S);
-            let p3=mapCoord(l3.tP*S,l3.xP*S),p4=mapCoord(l4.tP*S,l4.xP*S);
-            ln(ctx,p1.x,p1.y,p2.x,p2.y,"#444452",1.5);ln(ctx,p3.x,p3.y,p4.x,p4.y,"#444452",1.5);
-        }
+    let activeBf = isMap ? 0 : -bf;
+    for(let i=-12; i<=12; i++){
+        let l1=bst(-12,i,activeBf),l2=bst(12,i,activeBf),l3=bst(i,-12,activeBf),l4=bst(i,12,activeBf);
+        let p1=mapCoord(l1.tP*S,l1.xP*S),p2=mapCoord(l2.tP*S,l2.xP*S);
+        let p3=mapCoord(l3.tP*S,l3.xP*S),p4=mapCoord(l4.tP*S,l4.xP*S);
+        ln(ctx,p1.x,p1.y,p2.x,p2.y,"#444452",1.5);ln(ctx,p3.x,p3.y,p4.x,p4.y,"#444452",1.5);
     }
     let pOrigin=mapCoord(0,0);
     ln(ctx,0,pOrigin.y,W,pOrigin.y,"#fff",2);ln(ctx,pOrigin.x,0,pOrigin.x,H,"#fff",2);
@@ -46,16 +38,21 @@ function grid(ctx,S,bf,isMap){
     ln(ctx,cone2_p1.x,cone2_p1.y,cone2_p2.x,cone2_p2.y,"#fbc02d",1.5);
     
     if(!isMap){
-        // FIXED PRINCIPAL AXES ALIGNMENT: Anchored strictly to the frame boost (-bf) configuration
-        let x_axis_end = bst(0, 12, -bf), t_axis_end = bst(12, 0, -bf);
+        // FIXED SCALE-INVARIANT AXIS CLIP LOOPS: Always traces the full length of the canvas view limits
+        let x_axis_end = bst(0, 24, -bf), t_axis_end = bst(24, 0, -bf);
         let p_x2=mapCoord(x_axis_end.tP*S, x_axis_end.xP*S), p_t2=mapCoord(t_axis_end.tP*S, t_axis_end.xP*S);
         ln(ctx,pOrigin.x,pOrigin.y,p_x2.x,p_x2.y,"#9999a8",2.5);ln(ctx,pOrigin.x,pOrigin.y,p_t2.x,p_t2.y,"#9999a8",2.5);
         
+        // FIXED ANCHOR LABELS: Constrains placement near stable canvas corners so they stay visible at high zoom scales
         ctx.fillStyle="#fbc02d";ctx.font="bold 13px sans-serif";
-        let lbl_x = bst(0, 2.2, -bf), lbl_t = bst(2.2, 0, -bf);
-        let plx = mapCoord(lbl_x.tP*S, lbl_x.xP*S), plt = mapCoord(lbl_t.tP*S, lbl_t.xP*S);
-        ctx.fillText(modeWest?"x'":"ct'",plx.x-15,plx.y-8);
-        ctx.fillText(modeWest?"ct'":"x'",plt.x+8,plt.y+12);
+        let signX = bf >= 0 ? 1 : -1;
+        let lblX_x = modeWest ? (W - 35) : (W - 35);
+        let lblX_y = modeWest ? (pOrigin.y - 12 - signX*15) : (pOrigin.y - 25);
+        let lblT_x = modeWest ? (pOrigin.x + 8 + signX*25) : (pOrigin.x + 8);
+        let lblT_y = modeWest ? 32 : 32;
+        
+        ctx.fillText(modeWest?"x'":"ct'", lblX_x, lblX_y);
+        ctx.fillText(modeWest?"ct'":"x'", lblT_x, lblT_y);
     }
 }
 function run(){
@@ -69,7 +66,6 @@ function run(){
     document.getElementById('uV').innerText="("+u0.toFixed(2)+"c, "+u1.toFixed(2)+"c)";document.getElementById('aV').innerText="("+a0.toFixed(2)+"a, "+a1.toFixed(2)+"a)";
     const dP=u0*a0-u1*a1;document.getElementById('dP').innerText=Math.abs(dP)<1e-10?"0.000":dP.toFixed(3);
     
-    // Left Plot (Laboratory Frame S Map)
     let pBaseStart = mapCoord(-2.0*S,0), pBaseEnd = mapCoord(2.0*S,0);
     ln(cM,pBaseStart.x,pBaseStart.y,pBaseEnd.x,pBaseEnd.y,"#03dac6",2.5);arr(cM,0,0,2.0*S,0,"#03dac6",2.5);
     
@@ -97,7 +93,6 @@ function run(){
         arr(cM,py,px,py+a0*S*sm*0.015,px+a1*S*sm*0.015,"#4caf50",3.5,"A");
     }
     
-    // Right Plot (Laboratory Frame S Perspective Gauge Map)
     cG.strokeStyle="#00f0ff";cG.lineWidth=2.5;cG.beginPath();
     for(let xi=-3.0;xi<=3.0;xi+=0.04){
         let bShell=bst(Math.cosh(xi),Math.sinh(xi),0);
@@ -105,10 +100,12 @@ function run(){
         if(xi===-3.0)cG.moveTo(pShell.x,pShell.y);else cG.lineTo(pShell.x,pShell.y);
     }
     cG.stroke();
+    
+    // FIXED MASS SHELL ANCHOR: Stays cleanly nested on screen relative to canvas center
     let bShellLbl=bst(Math.cosh(0.8),Math.sinh(0.8),0);let pLbl=mapCoord(bShellLbl.tP*S,bShellLbl.xP*S);
+    pLbl.x = Math.max(30, Math.min(W - 60, pLbl.x)); pLbl.y = Math.max(30, Math.min(H - 30, pLbl.y));
     cG.fillStyle="#00f0ff";cG.font="bold 13px sans-serif";cG.fillText("U²=c²",pLbl.x+8,pLbl.y);
     
-    // Vectors plot natively on the resting framework coordinates
     arr(cG,0,0,u0*S,u1*S,"#bb86fc",3.5,"U");
     if(!isZeroA)arr(cG,0,0,a0*S*0.4,a1*S*0.4,"#4caf50",3.5,"A");
 }
