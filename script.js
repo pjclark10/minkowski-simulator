@@ -13,8 +13,10 @@ function arr(ctx,t1,x1,t2,x2,cl,w,lb=""){
 }
 function grid(ctx,S,bf,isMap){
     ctx.clearRect(0,0,W,H);
+    // UNIFIED RECESSED BOOST GRID LOOKUP: Applies consistent matrix velocity transform across background loops
+    let activeBf = isMap ? 0 : -bf;
     for(let i=-12; i<=12; i++){
-        let l1=bst(-12,i,bf),l2=bst(12,i,bf),l3=bst(i,-12,bf),l4=bst(i,12,bf);
+        let l1=bst(-12,i,activeBf),l2=bst(12,i,activeBf),l3=bst(i,-12,activeBf),l4=bst(i,12,activeBf);
         let p1=mapCoord(l1.tP*S,l1.xP*S),p2=mapCoord(l2.tP*S,l2.xP*S);
         let p3=mapCoord(l3.tP*S,l3.xP*S),p4=mapCoord(l4.tP*S,l4.xP*S);
         ln(ctx,p1.x,p1.y,p2.x,p2.y,"#444452",1.5);ln(ctx,p3.x,p3.y,p4.x,p4.y,"#444452",1.5);
@@ -24,29 +26,18 @@ function grid(ctx,S,bf,isMap){
     ctx.fillStyle="#2a2a35";ctx.fillRect(W-30,pOrigin.y-22,24,18);ctx.fillRect(pOrigin.x-25,4,22,18);
     ctx.strokeStyle="#fff";ctx.lineWidth=1;ctx.strokeRect(W-30,pOrigin.y-22,24,18);ctx.strokeRect(pOrigin.x-25,4,22,18);
     ctx.fillStyle="#fff";ctx.font="bold 12px sans-serif";
-    ctx.fillText(modeWest?"x":"ct",W-23,pOrigin.y-9);ctx.fillText(modeWest?"ct":"x",pOrigin.x-20,17);
+    
+    // Manage dynamic label switches based on orientation toggle
+    if (isMap) {
+        ctx.fillText(modeWest?"x":"ct",W-23,pOrigin.y-9);ctx.fillText(modeWest?"ct":"x",pOrigin.x-20,17);
+    } else {
+        ctx.fillText(modeWest?"x'":"ct'",W-23,pOrigin.y-9);ctx.fillText(modeWest?"ct'":"x'",pOrigin.x-20,17);
+    }
     
     let cone1_p1=mapCoord(0,0), cone1_p2=mapCoord(450,450);
     let cone2_p1=mapCoord(0,0), cone2_p2=mapCoord(450,-450);
     ln(ctx,cone1_p1.x,cone1_p1.y,cone1_p2.x,cone1_p2.y,"#fbc02d",1.5);
     ln(ctx,cone2_p1.x,cone2_p1.y,cone2_p2.x,cone2_p2.y,"#fbc02d",1.5);
-    
-    if(!isMap){
-        // FIXED COORDINATE AXES BOOST MATRIX SIGN: Uses receding sign (-bf) to display the correct physical frame contraction rules
-        let x_axis_start = bst(0, -12, -bf), x_axis_end = bst(0, 12, -bf);
-        let t_axis_start = bst(-12, 0, -bf), t_axis_end = bst(12, 0, -bf);
-        
-        let p_x1=mapCoord(x_axis_start.tP*S, x_axis_start.xP*S), p_x2=mapCoord(x_axis_end.tP*S, x_axis_end.xP*S);
-        let p_t1=mapCoord(t_axis_start.tP*S, t_axis_start.xP*S), p_t2=mapCoord(t_axis_end.tP*S, t_axis_end.xP*S);
-        
-        ln(ctx,p_x1.x,p_x1.y,p_x2.x,p_x2.y,"#9999a8",2.5);ln(ctx,p_t1.x,p_t1.y,p_t2.x,p_t2.y,"#9999a8",2.5);
-        
-        ctx.fillStyle="#fbc02d";ctx.font="bold 13px sans-serif";
-        let lbl_x = bst(0, 2.2, -bf), lbl_t = bst(2.2, 0, -bf);
-        let plx = mapCoord(lbl_x.tP*S, lbl_x.xP*S), plt = mapCoord(lbl_t.tP*S, lbl_t.xP*S);
-        ctx.fillText(modeWest?"x'":"ct'",plx.x-15,plx.y-8);
-        ctx.fillText(modeWest?"ct'":"x'",plt.x+8,plt.y+12);
-    }
 }
 function run(){
     const v=parseFloat(sV.value),a=parseFloat(sA.value),S=parseInt(sS.value),bf=parseFloat(sB.value);grid(cM,S,0,true);grid(cG,S,bf,false);
@@ -54,10 +45,14 @@ function run(){
     const isZeroA=Math.abs(a)<0.01;document.getElementById('rV').innerText=isZeroA?"Infinity":(1/Math.abs(a)).toFixed(2);
     let u0=1,u1=0,a0=0,a1=0;const g0=1/Math.sqrt(1-v*v);
     if(!isZeroA){let p_t=g0*v+a*targetT;let g_t=Math.sqrt(1+p_t*p_t);u0=g_t;u1=p_t;a0=a*u1;a1=a*u0;}else{u0=g0;u1=g0*v;}
-    const bU=bst(u0,u1,bf),bA=bst(a0,a1,bf);document.getElementById('gV').innerText=u0.toFixed(2);
+    
+    // Evaluate vectors directly in the boosted S' frame frame path
+    const bU=bst(u0,u1,bf),bA=bst(a0,a1,bf);
+    document.getElementById('gV').innerText=u0.toFixed(2);
     document.getElementById('uV').innerText="("+bU.tP.toFixed(2)+"c, "+bU.xP.toFixed(2)+"c)";document.getElementById('aV').innerText="("+bA.tP.toFixed(2)+"a, "+bA.xP.toFixed(2)+"a)";
     const dP=bU.tP*bA.tP-bU.xP*bA.xP;document.getElementById('dP').innerText=Math.abs(dP)<1e-10?"0.000":dP.toFixed(3);
     
+    // Left Plot (S Frame Workspace)
     let pBaseStart = mapCoord(-2.0*S,0), pBaseEnd = mapCoord(2.0*S,0);
     ln(cM,pBaseStart.x,pBaseStart.y,pBaseEnd.x,pBaseEnd.y,"#03dac6",2.5);arr(cM,0,0,2.0*S,0,"#03dac6",2.5);
     
@@ -85,16 +80,19 @@ function run(){
         arr(cM,py,px,py+a0*S*sm*0.015,px+a1*S*sm*0.015,"#4caf50",3.5,"A");
     }
     
+    // Right Plot (Boosted S' Frame Workspace)
     cG.strokeStyle="#00f0ff";cG.lineWidth=2.5;cG.beginPath();
     for(let xi=-3.0;xi<=3.0;xi+=0.04){
-        let bShell=bst(Math.cosh(xi),Math.sinh(xi),bf);
+        // Mass shell curves stay centered on the unshifted origin space
+        let bShell=bst(Math.cosh(xi),Math.sinh(xi),0);
         let pShell=mapCoord(bShell.tP*S,bShell.xP*S);
         if(xi===-3.0)cG.moveTo(pShell.x,pShell.y);else cG.lineTo(pShell.x,pShell.y);
     }
     cG.stroke();
-    let bShellLbl=bst(Math.cosh(0.8),Math.sinh(0.8),bf);let pLbl=mapCoord(bShellLbl.tP*S,bShellLbl.xP*S);
+    let bShellLbl=bst(Math.cosh(0.8),Math.sinh(0.8),0);let pLbl=mapCoord(bShellLbl.tP*S,bShellLbl.xP*S);
     cG.fillStyle="#00f0ff";cG.font="bold 13px sans-serif";cG.fillText("U²=c²",pLbl.x+8,pLbl.y);
-    arr(cG,0,0,bst(1,0,bf).tP*S,bst(1,0,bf).xP*S,"#03dac6",2.5);
+    
+    // RENDER METRICS ENTIRELY COMPLIANT TO S' OBSERVER: Clears static overlaps
     arr(cG,0,0,bU.tP*S,bU.xP*S,"#bb86fc",3.5,"U'");
     if(!isZeroA)arr(cG,0,0,bA.tP*S*0.4,bA.xP*S*0.4,"#4caf50",3.5,"A'");
 }
