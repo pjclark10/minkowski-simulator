@@ -5,31 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Minkowski Spacetime Simulator</title>
     <style>
-        body { font-family: sans-serif; background: #121214; color: #f5f5fa; display: flex; flex-direction: column; align-items: center; padding: 8px; margin: 0; box-sizing: border-box; min-height: 100vh; overflow-x: hidden; }
+        body { font-family: sans-serif; background: #121214; color: #f5f5fa; display: flex; flex-direction: column; align-items: center; padding: 8px; margin: 0; box-sizing: border-box; min-height: 100vh; }
         * { box-sizing: border-box; }
         .box { background: #1e1e24; border-radius: 12px; padding: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); width: 100%; max-width: 920px; display: flex; flex-direction: column; }
         .header-row { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
         @media(min-width: 600px) { .header-row { flex-direction: row; justify-content: space-between; align-items: center; } }
         
-        /* SCROLLABLE VIEWPORTS FOR MOBILE ARCHITECTURE */
         .main-content { display: flex; flex-direction: column; width: 100%; }
         @media(min-width: 850px) { .main-content { flex-direction: row; gap: 16px; } }
         
         .plots-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; width: 100%; }
-        .plots { display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center; width: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 10px; }
+        .plots { display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center; width: 100%; padding-bottom: 10px; }
         @media(min-width: 550px) and (max-width: 849px) { .plots { flex-direction: row; align-items: flex-start; } }
         .plot-container { text-align: center; width: 100%; max-width: 410px; }
-        canvas { background: #0b0b0d; border-radius: 8px; border: 2px solid #3d3d45; width: 100%; height: auto; aspect-ratio: 1/1; display: block; touch-action: none; }
+        
+        /* MOBILE TOUCH SCROLL PASS-THROUGH FIX */
+        canvas { background: #0b0b0d; border-radius: 8px; border: 2px solid #3d3d45; width: 100%; height: auto; aspect-ratio: 1/1; display: block; pointer-events: none; }
+        .canvas-touch-wrapper { width: 100%; height: auto; pointer-events: auto; }
         
         .legend { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 11px; font-weight: bold; line-height: 1.4; width: 100%; max-width: 832px; }
         .legend-item { display: flex; align-items: center; gap: 4px; }
         .dot { width: 10px; height: 12px; border-radius: 50%; display: inline-block; }
         
-        /* BOTTOM PANEL INTERACTIVITY: Isolated scrolling deck for controls */
         .controls { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; font-size: 13px; width: 100%; }
         @media(max-width: 849px) { 
             body { padding-bottom: 250px; } 
-            .controls { position: fixed; bottom: 0; left: 0; right: 0; border-radius: 12px 12px 0 0; box-shadow: 0 -8px 24px rgba(0,0,0,0.6); background: #1e1e24; border-top: 2px solid #3d3d45; height: 240px; overflow-y: scroll; -webkit-overflow-scrolling: touch; z-index: 1000; padding: 12px 16px; touch-action: pan-y; } 
+            .controls { position: fixed; bottom: 0; left: 0; right: 0; border-radius: 12px 12px 0 0; box-shadow: 0 -8px 24px rgba(0,0,0,0.6); background: #1e1e24; border-top: 2px solid #3d3d45; height: 240px; overflow-y: scroll; -webkit-overflow-scrolling: touch; z-index: 1000; padding: 12px 16px; } 
         }
         @media(min-width: 850px) { .controls { width: 340px; margin-top: 22px; height: fit-content; } }
         
@@ -38,7 +39,7 @@
         .row label { font-weight: bold; width: 100%; color: #e2e2ec; }
         @media(min-width: 420px) { .row label { width: 140px; } }
         .slider-container { display: flex; align-items: center; gap: 8px; flex: 1; width: 100%; }
-        input[type="range"] { flex: 1; accent-color: #bb86fc; height: 36px; cursor: pointer; touch-action: pan-x; }
+        input[type="range"] { flex: 1; accent-color: #bb86fc; height: 36px; cursor: pointer; }
         .slider-val { font-family: monospace; width: 35px; font-size: 13px; text-align: right; color: #a4a4b5; }
         .btn { background: #bb86fc; color: #121214; border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; transition: background 0.2s; min-height: 36px; }
         .btn:hover { background: #d0a3ff; }
@@ -60,8 +61,8 @@
     <div class="main-content">
         <div class="plots-wrapper">
             <div class="plots">
-                <div class="plot-container"><div>Diagram (a): Spacetime Map (Laboratory Frame S)</div><canvas id="map" width="410" height="410"></canvas></div>
-                <div class="plot-container"><div>Diagram (b): Boosted Axes (S Frame Perspective)</div><canvas id="gauge" width="410" height="410"></canvas></div>
+                <div class="plot-container"><div>Diagram (a): Spacetime Map (Laboratory Frame S)</div><div class="canvas-touch-wrapper"><canvas id="map" width="410" height="410"></canvas></div></div>
+                <div class="plot-container"><div>Diagram (b): Boosted Axes (S Frame Perspective)</div><div class="canvas-touch-wrapper"><canvas id="gauge" width="410" height="410"></canvas></div></div>
             </div>
             <div class="legend">
                 <div class="legend-item"><span class="dot" style="background:#03dac6;"></span> Stationary Particle / Lab Axis</div>
