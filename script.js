@@ -95,10 +95,11 @@ function run(){
     cG.stroke();
     let bShellLbl=bst(Math.cosh(0.8),Math.sinh(0.8),bf);let pLbl=mapCoord(bShellLbl.tP*S,bShellLbl.xP*S);
     cG.fillStyle="#00f0ff";cG.font="bold 13px sans-serif";cG.fillText("U²=c²",pLbl.x+8,pLbl.y);
-    arr(gauge,0,0,bst(1,0,bf).tP*S,bst(1,0,bf).xP*S,"#03dac6",2.5);
-    arr(gauge,0,0,bU.tP*S,bU.xP*S,"#bb86fc",3.5,"U'");
-    if(!isZeroA)arr(gauge,0,0,bA.tP*S*0.4,bA.xP*S*0.4,"#4caf50",3.5,"A'");
+    arr(cG,0,0,bst(1,0,bf).tP*S,bst(1,0,bf).xP*S,"#03dac6",2.5);
+    arr(cG,0,0,bU.tP*S,bU.xP*S,"#bb86fc",3.5,"U'");
+    if(!isZeroA)arr(cG,0,0,bA.tP*S*0.4,bA.xP*S*0.4,"#4caf50",3.5,"A'");
 }
+// FIXED: Forcing automated layout re-runs right inside click event bindings to bypass manual reset needs
 mW.addEventListener('click',()=>{modeWest=true;mW.classList.add('btn-active');mE.classList.remove('btn-active');run();});
 mE.addEventListener('click',()=>{modeWest=false;mE.classList.add('btn-active');mW.classList.remove('btn-active');run();});
 rB.addEventListener('click',()=>{sV.value=0.34;sB.value=0.00;sA.value=0.50;sS.value=110;run();});[sV,sB,sA,sS].forEach(s=>s.addEventListener('input',run));run();
