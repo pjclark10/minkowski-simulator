@@ -32,17 +32,12 @@ function grid(ctx,S,bf,isMap){
     ln(ctx,cone2_p1.x,cone2_p1.y,cone2_p2.x,cone2_p2.y,"#fbc02d",1.5);
     
     if(!isMap){
-        // FIXED ORIGIN CROSSING: Compute lines that trace through the origin (0,0) by transforming pure unboosted S frame axes paths
         let x_axis_start = bst(0, -12, bf), x_axis_end = bst(0, 12, bf);
         let t_axis_start = bst(-12, 0, bf), t_axis_end = bst(12, 0, bf);
-        
         let p_x1=mapCoord(x_axis_start.tP*S, x_axis_start.xP*S), p_x2=mapCoord(x_axis_end.tP*S, x_axis_end.xP*S);
         let p_t1=mapCoord(t_axis_start.tP*S, t_axis_start.xP*S), p_t2=mapCoord(t_axis_end.tP*S, t_axis_end.xP*S);
-        
         ln(ctx,p_x1.x,p_x1.y,p_x2.x,p_x2.y,"#9999a8",2.5);ln(ctx,p_t1.x,p_t1.y,p_t2.x,p_t2.y,"#9999a8",2.5);
-        
         ctx.fillStyle="#fbc02d";ctx.font="bold 13px sans-serif";
-        // Dynamic labels anchor safely to the tips of the transformed axes lines
         let lbl_x = bst(0, 2.2, bf), lbl_t = bst(2.2, 0, bf);
         let plx = mapCoord(lbl_x.tP*S, lbl_x.xP*S), plt = mapCoord(lbl_t.tP*S, lbl_t.xP*S);
         ctx.fillText(modeWest?"x'":"ct'",plx.x-15,plx.y-8);
@@ -56,7 +51,7 @@ function run(){
     let u0=1,u1=0,a0=0,a1=0;const g0=1/Math.sqrt(1-v*v);
     if(!isZeroA){let p_t=g0*v+a*targetT;let g_t=Math.sqrt(1+p_t*p_t);u0=g_t;u1=p_t;a0=a*u1;a1=a*u0;}else{u0=g0;u1=g0*v;}
     const bU=bst(u0,u1,bf),bA=bst(a0,a1,bf);document.getElementById('gV').innerText=u0.toFixed(2);
-    document.getElementById('uV').innerText="("+bU.tP.toFixed(2)+"c, "+bU.xP.toFixed(2)+"c)";document.getElementById('aV').innerText="("+bA.tP.toFixed(2)+"a, "+bA.tP.toFixed(2)+"a)";
+    document.getElementById('uV').innerText="("+bU.tP.toFixed(2)+"c, "+bU.xP.toFixed(2)+"c)";document.getElementById('aV').innerText="("+bA.tP.toFixed(2)+"a, "+bA.xP.toFixed(2)+"a)";
     const dP=bU.tP*bA.tP-bU.xP*bA.xP;document.getElementById('dP').innerText=Math.abs(dP)<1e-10?"0.000":dP.toFixed(3);
     
     let pBaseStart = mapCoord(-2.0*S,0), pBaseEnd = mapCoord(2.0*S,0);
