@@ -1,9 +1,9 @@
-const sV=document.getElementById('vS'),sB=document.getElementById('bS'),sA=document.getElementById('aS'),sS=document.getElementById('sS'),rB=document.getElementById('rB'),mW=document.getElementById('mW'),mE=document.getElementById('mE'),cM=document.getElementById('map').getContext('2d'),cG=document.getElementById('gauge').getContext('2d'),W=410,H=410,OX=205,OY=360,targetT=1.5; let modeWest=true;
+const sV=document.getElementById('vS'),sB=document.getElementById('bS'),sA=document.getElementById('aS'),sS=document.getElementById('sS'),rB=document.getElementById('rB'),mW=document.getElementById('mW'),mE=document.getElementById('mE'),cM=document.getElementById('map').getContext('2d'),cG=document.getElementById('gauge').getContext('2d'),W=410,H=410,OX=205,OY=205,targetT=1.5; let modeWest=true;
 function bst(t,x,b){let g=1/Math.sqrt(1-b*b);return{tP:g*(t-b*x),xP:g*(x-b*t)};}
 function ln(ctx,x1,y1,x2,y2,cl,w){ctx.strokeStyle=cl;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
 function mapCoord(t,x){
     let cX = modeWest ? OX + x : OX + t;
-    let cY = modeWest ? OY - t : (OY - OX/2) - x;
+    let cY = modeWest ? OY - t : OY - x;
     return {x: cX, y: cY};
 }
 function arr(ctx,t1,x1,t2,x2,cl,w,lb=""){
@@ -20,33 +20,25 @@ function grid(ctx,S,bf,isMap){
         ln(ctx,p1.x,p1.y,p2.x,p2.y,"#444452",1.5);ln(ctx,p3.x,p3.y,p4.x,p4.y,"#444452",1.5);
     }
     let pOrigin=mapCoord(0,0);
-    if(modeWest){
-        ln(ctx,0,OY,W,OY,"#fff",2);ln(ctx,OX,0,OX,H,"#fff",2);
-        ctx.fillStyle="#2a2a35";ctx.fillRect(W-30,OY-22,24,18);ctx.fillRect(OX-25,4,22,18);
-        ctx.strokeStyle="#fff";ctx.lineWidth=1;ctx.strokeRect(W-30,OY-22,24,18);ctx.strokeRect(OX-25,4,22,18);
-        ctx.fillStyle="#fff";ctx.font="bold 12px sans-serif";ctx.fillText("x",W-23,OY-9);ctx.fillText("ct",OX-20,17);
-    }else{
-        ln(ctx,0,pOrigin.y,W,pOrigin.y,"#fff",2);ln(ctx,OX,0,OX,H,"#fff",2);
-        ctx.fillStyle="#2a2a35";ctx.fillRect(W-30,pOrigin.y+4,24,18);ctx.fillRect(OX-25,4,22,18);
-        ctx.strokeStyle="#fff";ctx.lineWidth=1;ctx.strokeRect(W-30,pOrigin.y+4,24,18);ctx.strokeRect(OX-25,4,22,18);
-        ctx.fillStyle="#fff";ctx.font="bold 12px sans-serif";ctx.fillText("ct",W-25,pOrigin.y+17);ctx.fillText("x",OX-18,17);
-    }
+    ln(ctx,0,pOrigin.y,W,pOrigin.y,"#fff",2);ln(ctx,pOrigin.x,0,pOrigin.x,H,"#fff",2);
+    ctx.fillStyle="#2a2a35";ctx.fillRect(W-30,pOrigin.y-22,24,18);ctx.fillRect(pOrigin.x-25,4,22,18);
+    ctx.strokeStyle="#fff";ctx.lineWidth=1;ctx.strokeRect(W-30,pOrigin.y-22,24,18);ctx.strokeRect(pOrigin.x-25,4,22,18);
+    ctx.fillStyle="#fff";ctx.font="bold 12px sans-serif";
+    ctx.fillText(modeWest?"x":"ct",W-23,pOrigin.y-9);ctx.fillText(modeWest?"ct":"x",pOrigin.x-20,17);
+    
     let cone1_p1=mapCoord(0,0), cone1_p2=mapCoord(450,450);
     let cone2_p1=mapCoord(0,0), cone2_p2=mapCoord(450,-450);
     ln(ctx,cone1_p1.x,cone1_p1.y,cone1_p2.x,cone1_p2.y,"#fbc02d",1.5);
     ln(ctx,cone2_p1.x,cone2_p1.y,cone2_p2.x,cone2_p2.y,"#fbc02d",1.5);
+    
     if(!isMap){
         let x1=bst(0,-8,bf),x2=bst(0,8,bf),t1=bst(-4,0,bf),t2=bst(8,0,bf);
         let p_x1=mapCoord(x1.tP*S,x1.xP*S), p_x2=mapCoord(x2.tP*S,x2.xP*S);
         let p_t1=mapCoord(t1.tP*S,t1.xP*S), p_t2=mapCoord(t2.tP*S,t2.xP*S);
-        p_x1.x=Math.max(10,Math.min(W-10,p_x1.x));p_x1.y=Math.max(10,Math.min(H-10,p_x1.y));
-        p_x2.x=Math.max(10,Math.min(W-10,p_x2.x));p_x2.y=Math.max(10,Math.min(H-10,p_x2.y));
-        p_t1.x=Math.max(10,Math.min(W-10,p_t1.x));p_t1.y=Math.max(10,Math.min(H-10,p_t1.y));
-        p_t2.x=Math.max(10,Math.min(W-10,p_t2.x));p_t2.y=Math.max(10,Math.min(H-10,p_t2.y));
         ln(ctx,p_x1.x,p_x1.y,p_x2.x,p_x2.y,"#9999a8",2.5);ln(ctx,p_t1.x,p_t1.y,p_t2.x,p_t2.y,"#9999a8",2.5);
         ctx.fillStyle="#fbc02d";ctx.font="bold 13px sans-serif";
-        ctx.fillText(modeWest?"x'":"ct'",p_x2.x+(modeWest? -20 : 8),p_x2.y+(modeWest? -8 : 15));
-        ctx.fillText(modeWest?"ct'":"x'",p_t2.x+(modeWest? 8 : -18),p_t2.y+(modeWest? 0 : -8));
+        ctx.fillText(modeWest?"x'":"ct'",p_x2.x-15,p_x2.y-8);
+        ctx.fillText(modeWest?"ct'":"x'",p_t2.x+8,p_t2.y+12);
     }
 }
 function run(){
@@ -59,21 +51,21 @@ function run(){
     document.getElementById('uV').innerText="("+bU.tP.toFixed(2)+"c, "+bU.xP.toFixed(2)+"c)";document.getElementById('aV').innerText="("+bA.tP.toFixed(2)+"a, "+bA.xP.toFixed(2)+"a)";
     const dP=bU.tP*bA.tP-bU.xP*bA.xP;document.getElementById('dP').innerText=Math.abs(dP)<1e-10?"0.000":dP.toFixed(3);
     
-    let pBaseStart = mapCoord(0,0), pBaseEnd = mapCoord(H,0);
+    let pBaseStart = mapCoord(-2.0*S,0), pBaseEnd = mapCoord(2.0*S,0);
     ln(cM,pBaseStart.x,pBaseStart.y,pBaseEnd.x,pBaseEnd.y,"#03dac6",2.5);arr(cM,0,0,2.0*S,0,"#03dac6",2.5);
     
     let px=0,py=0;
     if(isZeroA){
         cM.strokeStyle="#cf6679";cM.lineWidth=3;cM.beginPath();
-        let pathStart=mapCoord(-0.5*S,(-v*0.5)*S), pathEnd=mapCoord(4.5*S,(v*4.5)*S);
+        let pathStart=mapCoord(-1.5*S,(-v*1.5)*S), pathEnd=mapCoord(2.5*S,(v*2.5)*S);
         cM.moveTo(pathStart.x,pathStart.y);cM.lineTo(pathEnd.x,pathEnd.y);cM.stroke();
         px=(v*targetT)*S;py=targetT*S;
     }else{
         cM.strokeStyle="#cf6679";cM.lineWidth=3;cM.beginPath();
-        for(let tg=-0.5;tg<=4.5;tg+=0.02){
+        for(let tg=-1.5;tg<=2.5;tg+=0.02){
             let dx=(Math.sqrt(1+Math.pow(g0*v+a*tg,2))-g0)/a;
             let pTrace=mapCoord(tg*S,dx*S);
-            if(tg===-0.5)cM.moveTo(pTrace.x,pTrace.y);else cM.lineTo(pTrace.x,pTrace.y);
+            if(tg===-1.5)cM.moveTo(pTrace.x,pTrace.y);else cM.lineTo(pTrace.x,pTrace.y);
         }
         cM.stroke();
         let tx=(Math.sqrt(1+Math.pow(g0*v+a*targetT,2))-g0)/a;px=tx*S;py=targetT*S;
@@ -99,7 +91,6 @@ function run(){
     arr(cG,0,0,bU.tP*S,bU.xP*S,"#bb86fc",3.5,"U'");
     if(!isZeroA)arr(cG,0,0,bA.tP*S*0.4,bA.xP*S*0.4,"#4caf50",3.5,"A'");
 }
-// FIXED: Forcing automated layout re-runs right inside click event bindings to bypass manual reset needs
 mW.addEventListener('click',()=>{modeWest=true;mW.classList.add('btn-active');mE.classList.remove('btn-active');run();});
 mE.addEventListener('click',()=>{modeWest=false;mE.classList.add('btn-active');mW.classList.remove('btn-active');run();});
 rB.addEventListener('click',()=>{sV.value=0.34;sB.value=0.00;sA.value=0.50;sS.value=110;run();});[sV,sB,sA,sS].forEach(s=>s.addEventListener('input',run));run();
