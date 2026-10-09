@@ -39,7 +39,6 @@
         .btn:hover { background: #d0a3ff; }
         .btn-toggle { background: #3d3d45; color: #f5f5fa; border: 1px solid #555; margin-right: 4px; margin-bottom: 4px; padding: 6px 12px; }
         .btn-active { background: #ffeb3b !important; color: #121214 !important; border: 1px solid #ffeb3b; }
-        .legend-panel { display: flex; flex-direction: column; gap: 6px; }
         .metrics-panel { border-top: 1px solid #444; padding-top: 8px; margin-top: 8px; font-family: monospace; font-size: 12px; line-height: 1.4; display: flex; flex-direction: column; gap: 6px; }
     </style>
 </head>
@@ -57,15 +56,15 @@
         <div class="plots-wrapper">
             <div class="plots">
                 <div class="plot-container"><div>Diagram (a): Spacetime Map (Laboratory Frame S)</div><canvas id="map" width="410" height="410"></canvas></div>
-                <div class="plot-container"><div>Diagram (b): Scale Gauge (Boosted Frame S')</div><canvas id="gauge" width="410" height="410"></canvas></div>
+                <div class="plot-container"><div>Diagram (b): Boosted Axes (S Frame Perspective)</div><canvas id="gauge" width="410" height="410"></canvas></div>
             </div>
             <div class="legend">
-                <div class="legend-item"><span class="dot" style="background:#03dac6;"></span> U_static (S only)</div>
-                <div class="legend-item"><span class="dot" style="background:#cf6679;"></span> Worldline</div>
-                <div class="legend-item"><span class="dot" style="background:#bb86fc;"></span> Four-Velocity Vector (U / U')</div>
-                <div class="legend-item"><span class="dot" style="background:#4caf50;"></span> Four-Acceleration Vector (A / A')</div>
-                <div class="legend-item"><span class="dot" style="background:#fbc02d;"></span> Light Cone</div>
-                <div class="legend-item"><span class="dot" style="background:#00f0ff;"></span> Mass Shell (U² = c²)</div>
+                <div class="legend-item"><span class="dot" style="background:#03dac6;"></span> Stationary Particle / Lab Axis</div>
+                <div class="legend-item"><span class="dot" style="background:#cf6679;"></span> Accelerated Particle Worldline</div>
+                <div class="legend-item"><span class="dot" style="background:#bb86fc;"></span> Four-Velocity Vector (U)</div>
+                <div class="legend-item"><span class="dot" style="background:#4caf50;"></span> Four-Acceleration Vector (A)</div>
+                <div class="legend-item"><span class="dot" style="background:#fbc02d;"></span> Light Cone Bounds</div>
+                <div class="legend-item"><span class="dot" style="background:#00f0ff;"></span> Invariant Mass Shell (U² = c²)</div>
             </div>
         </div>
 
@@ -103,8 +102,8 @@
                 <button class="btn" id="rB" style="width: 100%; margin-bottom: 6px;">Reset Layout</button>
                 <div class="metrics-panel">
                     <div>&gamma;: <span id="gV" style="color:#bb86fc">1.06</span> | Accel: <span id="gfV" style="color:#4caf50;font-weight:bold">0.50g</span> | &rho;: <span id="rV" style="color:#ffeb3b;font-weight:bold">2.00</span></div>
-                    <div>U': <span id="uV" style="color:#03dac6"></span> | A': <span id="aV" style="color:#4caf50"></span></div>
-                    <div style="color:#ffeb3b;font-weight:bold; font-size:11px;"><span id="dPE">Dot Product (U' &middot; A') = +U'⁰A'⁰ - U'¹A'¹</span> = <span id="dP">0.000</span></div>
+                    <div>U in S: <span id="uV" style="color:#bb86fc"></span> | A in S: <span id="aV" style="color:#4caf50"></span></div>
+                    <div style="color:#ffeb3b;font-weight:bold; font-size:11px;"><span id="dPE">Dot Product (U &middot; A) = +U⁰A⁰ - U¹A¹</span> = <span id="dP">0.000</span></div>
                 </div>
             </div>
         </div>
