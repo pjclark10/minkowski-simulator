@@ -57,6 +57,7 @@
             let l3 = bst(i, -12, bf), l4 = bst(i, 12, bf);
             ctx.beginPath(); ctx.moveTo(OX + l3.xP*S, OY - l3.tP*S); ctx.lineTo(OX + l4.xP*S, OY - l4.tP*S); ctx.stroke();
         }
+        
         ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(0, OY); ctx.lineTo(W, OY); ctx.stroke();
         ctx.beginPath(); ctx.moveTo(OX, 0); ctx.lineTo(OX, H); ctx.stroke();
@@ -97,7 +98,7 @@
         document.getElementById('rhoVal').innerText = isZeroA ? "Infinity" : (1 / Math.abs(a)).toFixed(2);
 
         const u0 = g, u1 = g * v;
-        const a0 = isZeroA ? 0 : g*g*g*g*a*v, a1 = isZeroA ? 0 : g*g*g*g*a;
+        const a0 = isZeroA ? 0 : g*g*g*g*a*v, a1 = g*g*g*g*a;
 
         const bU = bst(u0, u1, bf);
         const bA = bst(a0, a1, bf); 
@@ -112,36 +113,31 @@
         cM.strokeStyle = "#03dac6"; cM.lineWidth = 2.5; cM.beginPath(); cM.moveTo(OX, 0); cM.lineTo(OX, H); cM.stroke();
         arr(cM, OX, OY - 1.5*S, OX, OY - 2.5*S, "#03dac6", 2.5);
 
-        // Worldline rendering path
         let px = OX, py = OY - 1.5*S;
         if (isZeroA) {
-            // If acceleration is zero, path is a straight inertial line mapping standard velocity
             cM.strokeStyle = "#cf6679"; cM.lineWidth = 3; cM.beginPath();
-            let bStart = boostLinePoint(-1, v, S), bEnd = boostLinePoint(4, v, S);
-            cM.moveTo(bStart.x, bStart.y); cM.lineTo(bEnd.x, bEnd.y); cM.stroke();
+            cM.moveTo(OX - (v * 1.5)*S, OY); cM.lineTo(OX + (v * 4.5)*S, OY - 6*S); cM.stroke();
             px = OX + (v * 1.5) * S; py = OY - 1.5 * S;
         } else {
-            // Hyperbolic trajectory loop
+            // FIXED UNIFIED VELOCITY-ACCELERATION CURVE LOOP: Handles signs dynamically across all quadrants
             cM.strokeStyle = "#cf6679"; cM.lineWidth = 3; cM.beginPath();
-            const sgn = a >= 0 ? 1 : -1, absA = Math.abs(a);
-            for(let t=0; t<=12; t+=0.02) {
-                let gx = OX + (sgn * (Math.cosh(absA*t)-1)/absA)*S, gy = OY - (Math.sinh(absA*t)/absA)*S;
-                if(t===0) cM.moveTo(gx, gy); else cM.lineTo(gx, gy);
+            const absA = Math.abs(a);
+            // Hyperbolic trajectory parametric offset shifting origin based on deceleration parameters
+            const trajectorySign = a >= 0 ? 1 : -1;
+            for(let t=-4; t<=8; t+=0.02) {
+                let gx = OX + (trajectorySign * (Math.cosh(absA*t)-1)/absA)*S;
+                let gy = OY - (Math.sinh(absA*t)/absA + 1.5)*S;
+                if(t===-4) cM.moveTo(gx, gy); else cM.lineTo(gx, gy);
             }
             cM.stroke();
 
-            let tu = Math.atanh(Math.abs(v))/absA;
-            px = OX + (Math.sign(v) * (Math.cosh(absA*tu)-1)/absA)*S;
-            py = OY - (Math.sinh(absA*tu)/absA)*S;
-        }
-
-        function boostLinePoint(t, vel, scale) {
-            return { x: OX + (vel * t) * scale, y: OY - t * scale };
+            // FIXED POSITION MARKER MAP: Tracks perfectly across negative and positive directions dynamically
+            let currentTau = Math.atanh(v) / a;
+            px = OX + (trajectorySign * (Math.cosh(absA * currentTau) - 1) / absA) * S;
+            py = OY - (Math.sinh(absA * currentTau) / absA + 1.5) * S;
         }
 
         cM.fillStyle = "#fff"; cM.beginPath(); cM.arc(px, py, 5, 0, 2*Math.PI); cM.fill();
-        
-        // FIXED VELOCITY ARROW VISUAL TRACK: Clean 4D component drawing vector (Normalized visually to fit viewport)
         arr(cM, px, py, px + u1 * S * 0.4, py - u0 * S * 0.4, "#bb86fc", 3.5, "U");
         
         if (!isZeroA) {
