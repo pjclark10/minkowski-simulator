@@ -1,4 +1,14 @@
-const sV=document.getElementById('vS'),sB=document.getElementById('bS'),sA=document.getElementById('aS'),sS=document.getElementById('sS'),rB=document.getElementById('rB'),mW=document.getElementById('mW'),mE=document.getElementById('mE'),cM=document.getElementById('map').getContext('2d'),cG=document.getElementById('gauge').getContext('2d'),W=410,H=410,OX=205,OY=205,targetT=1.5; let modeWest=true;
+const sV=document.getElementById('vS'),sB=document.getElementById('bS'),sA=document.getElementById('aS'),sS=document.getElementById('sS'),rB=document.getElementById('rB'),mW=document.getElementById('mW'),mE=document.getElementById('mE'),W_css=410,H_css=410,targetT=1.5;
+const elM=document.getElementById('map'), elG=document.getElementById('gauge');
+const cM=elM.getContext('2d'), cG=elG.getContext('2d');
+
+// AUTOMATED RETINA ENGINE RESOLUTION COUPLING
+const dpr = window.devicePixelRatio || 1;
+elM.width = W_css * dpr; elM.height = H_css * dpr; cM.scale(dpr, dpr);
+elG.width = W_css * dpr; elG.height = H_css * dpr; cG.scale(dpr, dpr);
+
+const W=W_css, H=H_css, OX=205, OY=205; let modeWest=true;
+
 function bst(t,x,b){let g=1/Math.sqrt(1-b*b);return{tP:g*(t-b*x),xP:g*(x-b*t)};}
 function ln(ctx,x1,y1,x2,y2,cl,w){ctx.strokeStyle=cl;ctx.lineWidth=w;ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();}
 function mapCoord(t,x){
@@ -13,21 +23,13 @@ function arr(ctx,t1,x1,t2,x2,cl,w,lb=""){
 }
 function grid(ctx,S,bf,isMap){
     ctx.clearRect(0,0,W,H);
-    // Explicitly configure context rendering values for high-DPI desktop viewports
     ctx.lineCap = "round"; ctx.lineJoin = "round";
-    if(isMap){
-        for(let i=-12; i<=12; i++){
-            let p1=mapCoord(-12*S,i*S),p2=mapCoord(12*S,i*S);
-            let p3=mapCoord(i*S,-12*S),p4=mapCoord(i*S,12*S);
-            ln(ctx,p1.x,p1.y,p2.x,p2.y,"#444452",1.5);ln(ctx,p3.x,p3.y,p4.x,p4.y,"#444452",1.5);
-        }
-    }else {
-        for(let i=-12; i<=12; i++){
-            let l1=bst(-12,i,-bf),l2=bst(12,i,-bf),l3=bst(i,-12,-bf),l4=bst(i,12,-bf);
-            let p1=mapCoord(l1.tP*S,l1.xP*S),p2=mapCoord(l2.tP*S,l2.xP*S);
-            let p3=mapCoord(l3.tP*S,l3.xP*S),p4=mapCoord(l4.tP*S,l4.xP*S);
-            ln(ctx,p1.x,p1.y,p2.x,p2.y,"#444452",1.5);ln(ctx,p3.x,p3.y,p4.x,p4.y,"#444452",1.5);
-        }
+    let activeBf = isMap ? 0 : -bf;
+    for(let i=-12; i<=12; i++){
+        let l1=bst(-12,i,activeBf),l2=bst(12,i,activeBf),l3=bst(i,-12,activeBf),l4=bst(i,12,activeBf);
+        let p1=mapCoord(l1.tP*S,l1.xP*S),p2=mapCoord(l2.tP*S,l2.xP*S);
+        let p3=mapCoord(l3.tP*S,l3.xP*S),p4=mapCoord(l4.tP*S,l4.xP*S);
+        ln(ctx,p1.x,p1.y,p2.x,p2.y,"#444452",1.5);ln(ctx,p3.x,p3.y,p4.x,p4.y,"#444452",1.5);
     }
     let pOrigin=mapCoord(0,0);
     ln(ctx,0,pOrigin.y,W,pOrigin.y,"#fff",2);ln(ctx,pOrigin.x,0,pOrigin.x,H,"#fff",2);
@@ -57,6 +59,10 @@ function grid(ctx,S,bf,isMap){
         let lblX_y = modeWest ? (pOrigin.y - 12 - signX*15) : (pOrigin.y - 25);
         let lblT_x = modeWest ? (pOrigin.x + 8 + signX*25) : (pOrigin.x + 8);
         let lblT_y = 32;
+        
+        // FIXED SCALE RETINA TRACKING: Keeps labels locked safely inside bounding viewport parameters
+        lblX_x = Math.max(10, Math.min(W - 40, lblX_x)); lblX_y = Math.max(25, Math.min(H - 15, lblX_y));
+        lblT_x = Math.max(15, Math.min(W - 35, lblT_x)); lblT_y = Math.max(25, Math.min(H - 15, lblT_y));
         
         ctx.fillText(modeWest?"x'":"ct'", lblX_x, lblX_y);
         ctx.fillText(modeWest?"ct'":"x'", lblT_x, lblT_y);
