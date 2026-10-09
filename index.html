@@ -77,7 +77,6 @@
             let x1 = bst(0,-8,bf), x2 = bst(0,8,bf), t1 = bst(-4,0,bf), t2 = bst(8,0,bf);
             ctx.beginPath(); ctx.moveTo(OX+x1.xP*S, OY-x1.tP*S); ctx.lineTo(OX+x2.xP*S, OY-x2.tP*S); ctx.stroke();
             ctx.beginPath(); ctx.moveTo(OX+t1.xP*S, OY-t1.tP*S); ctx.lineTo(OX+t2.xP*S, OY-t2.tP*S); ctx.stroke();
-            
             ctx.fillStyle = "#fbc02d"; ctx.font = "bold 13px sans-serif";
             let labelX = bst(0, 1.8, bf), labelT = bst(3.2, 0, bf);
             ctx.fillText("x'", OX + labelX.xP*S, OY - labelX.tP*S - 8);
@@ -86,83 +85,66 @@
     }
     function run() {
         const v = parseFloat(sV.value), a = parseFloat(sA.value), S = parseInt(sS.value), bf = parseFloat(sB.value);
-        drawGrid(cM, S, 0, true);   
-        drawGrid(cG, S, bf, false); 
+        drawGrid(cM, S, 0, true); drawGrid(cG, S, bf, false); 
         const g = 1 / Math.sqrt(1 - v*v);
-        
         document.getElementById('gV').innerText = g.toFixed(2);
         document.getElementById('gForceVal').innerText = a.toFixed(2) + "g";
-        
         const isZeroA = Math.abs(a) < 0.01;
         document.getElementById('rhoVal').innerText = isZeroA ? "Infinity" : (1 / Math.abs(a)).toFixed(2);
 
-        const u0 = g, u1 = g * v;
-        const a0 = isZeroA ? 0 : g*g*g*g*a*v, a1 = isZeroA ? 0 : g*g*g*g*a;
+        const targetT = 1.5;
+        let u0 = g, u1 = g * v, a0 = 0, a1 = 0;
 
-        const bU = bst(u0, u1, bf);
-        const bA = bst(a0, a1, bf); 
+        if (!isZeroA) {
+            let v_t = (v + a * targetT) / (1 + v * a * targetT);
+            if (v_t > 0.99) v_t = 0.99; if (v_t < -0.99) v_t = -0.99;
+            let g_t = 1 / Math.sqrt(1 - v_t * v_t);
+            u0 = g_t; u1 = g_t * v_t; a0 = Math.pow(g_t, 4) * a * v_t; a1 = Math.pow(g_t, 4) * a;
+        }
 
+        const bU = bst(u0, u1, bf), bA = bst(a0, a1, bf); 
         document.getElementById('uV').innerText = "(" + bU.tP.toFixed(2) + "c, " + bU.xP.toFixed(2) + "c)";
         document.getElementById('aV').innerText = "(" + bA.tP.toFixed(2) + "a, " + bA.xP.toFixed(2) + "a)";
-
         const dotProd = bU.tP * bA.tP - bU.xP * bA.xP;
         document.getElementById('dotProdVal').innerText = Math.abs(dotProd) < 1e-10 ? "0.000" : dotProd.toFixed(3);
 
-        // Left Plot (Spacetime Map)
         cM.strokeStyle = "#03dac6"; cM.lineWidth = 2.5; cM.beginPath(); cM.moveTo(OX, 0); cM.lineTo(OX, H); cM.stroke();
         arr(cM, OX, OY - 1.5*S, OX, OY - 2.5*S, "#03dac6", 2.5);
 
-        // Core visual anchoring heights
-        const targetT = 1.5; 
-        let px = OX + (v * targetT) * S;
-        let py = OY - targetT * S;
-
+        let px = OX, py = OY;
         if (isZeroA) {
             cM.strokeStyle = "#cf6679"; cM.lineWidth = 3; cM.beginPath();
-            cM.moveTo(OX - (v * 1.5)*S, OY); cM.lineTo(OX + (v * 4.5)*S, OY - 6*S); cM.stroke();
+            cM.moveTo(OX - (v * 0.5)*S, OY + 0.5*S); cM.lineTo(OX + (v * 4.5)*S, OY - 4.5*S); cM.stroke();
+            px = OX + (v * targetT) * S; py = OY - targetT * S;
         } else {
-            // FIXED LABORATORY FRAME INTEGRATION: Sweeps cleanly through coordinate time to avoid hyperbolic scale clipping
             cM.strokeStyle = "#cf6679"; cM.lineWidth = 3; cM.beginPath();
-            
-            // Relativistic hyperbolic path baseline offset calculations
-            const t0 = v / a;
-            const x0 = (v * t0) - (Math.sqrt(1 + (a * t0) * (a * t0)) - 1) / a;
-
-            for(let t_grid = -1.5; t_grid <= 4.5; t_grid += 0.05) {
-                let dx = x0 + (Math.sqrt(1 + (a * t_grid) * (a * t_grid)) - 1) / a;
-                let canvasX = OX + dx * S;
-                let canvasY = OY - t_grid * S;
-                if(t_grid === -1.5) cM.moveTo(canvasX, canvasY); else cM.lineTo(canvasX, canvasY);
+            const absA = Math.abs(a), trajectorySign = a >= 0 ? 1 : -1;
+            for(let t_grid = -0.5; t_grid <= 4.5; t_grid += 0.02) {
+                let dx = (Math.sqrt(1 + Math.pow(g * a * t_grid + g * v, 2)) - g) / a;
+                if(t_grid === -0.5) cM.moveTo(OX + dx * S, OY - t_grid * S); else cM.lineTo(OX + dx * S, OY - t_grid * S);
             }
             cM.stroke();
-
-            // Marker dot links up beautifully to your targeted velocity vector coordinates
-            px = OX + (x0 + (Math.sqrt(1 + (a * targetT) * (a * targetT)) - 1) / a) * S;
-            py = OY - targetT * S;
+            let targetX = (Math.sqrt(1 + Math.pow(g * a * targetT + g * v, 2)) - g) / a;
+            px = OX + targetX * S; py = OY - targetT * S;
         }
 
         cM.fillStyle = "#fff"; cM.beginPath(); cM.arc(px, py, 5, 0, 2*Math.PI); cM.fill();
         arr(cM, px, py, px + u1 * S * 0.4, py - u0 * S * 0.4, "#bb86fc", 3.5, "U");
-        
         if (!isZeroA) {
             let scaleFactorM = 25 / Math.abs(a1); 
             arr(cM, px, py, px + a1*S*scaleFactorM*0.015, py - a0*S*scaleFactorM*0.015, "#4caf50", 3.5, "A");
         }
 
-        // Right Plot (Scale Gauge Workspace)
         cG.strokeStyle = "#d0a3ff"; cG.lineWidth = 2.5; cG.beginPath();
         for(let xi=-3.0; xi<=3.0; xi+=0.04) {
             let bShell = bst(Math.cosh(xi), Math.sinh(xi), bf);
             if(xi===-3.0) cG.moveTo(OX+bShell.xP*S, OY-bShell.tP*S); else cG.lineTo(OX+bShell.xP*S, OY-bShell.tP*S);
         }
         cG.stroke();
-        
         let bStatic = bst(1, 0, bf);
         arr(cG, OX, OY, OX + bStatic.xP*S, OY - bStatic.tP*S, "#03dac6", 2.5);
         arr(cG, OX, OY, OX + bU.xP*S, OY - bU.tP*S, "#bb86fc", 3.5, "U'");
-        if (!isZeroA) {
-            arr(cG, OX, OY, OX + bA.xP*S*0.4, OY - bA.tP*S*0.4, "#4caf50", 3.5, "A'");
-        }
+        if (!isZeroA) arr(cG, OX, OY, OX + bA.xP*S*0.4, OY - bA.tP*S*0.4, "#4caf50", 3.5, "A'");
     }
     [sV, sB, sA, sS].forEach(s => s.addEventListener('input', run)); run();
 </script>
