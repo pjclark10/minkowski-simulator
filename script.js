@@ -32,13 +32,17 @@ function grid(ctx,S,bf,isMap){
     ln(ctx,cone2_p1.x,cone2_p1.y,cone2_p2.x,cone2_p2.y,"#fbc02d",1.5);
     
     if(!isMap){
-        let x_axis_start = bst(0, -12, bf), x_axis_end = bst(0, 12, bf);
-        let t_axis_start = bst(-12, 0, bf), t_axis_end = bst(12, 0, bf);
+        // FIXED COORDINATE AXES BOOST MATRIX SIGN: Uses receding sign (-bf) to display the correct physical frame contraction rules
+        let x_axis_start = bst(0, -12, -bf), x_axis_end = bst(0, 12, -bf);
+        let t_axis_start = bst(-12, 0, -bf), t_axis_end = bst(12, 0, -bf);
+        
         let p_x1=mapCoord(x_axis_start.tP*S, x_axis_start.xP*S), p_x2=mapCoord(x_axis_end.tP*S, x_axis_end.xP*S);
         let p_t1=mapCoord(t_axis_start.tP*S, t_axis_start.xP*S), p_t2=mapCoord(t_axis_end.tP*S, t_axis_end.xP*S);
+        
         ln(ctx,p_x1.x,p_x1.y,p_x2.x,p_x2.y,"#9999a8",2.5);ln(ctx,p_t1.x,p_t1.y,p_t2.x,p_t2.y,"#9999a8",2.5);
+        
         ctx.fillStyle="#fbc02d";ctx.font="bold 13px sans-serif";
-        let lbl_x = bst(0, 2.2, bf), lbl_t = bst(2.2, 0, bf);
+        let lbl_x = bst(0, 2.2, -bf), lbl_t = bst(2.2, 0, -bf);
         let plx = mapCoord(lbl_x.tP*S, lbl_x.xP*S), plt = mapCoord(lbl_t.tP*S, lbl_t.xP*S);
         ctx.fillText(modeWest?"x'":"ct'",plx.x-15,plx.y-8);
         ctx.fillText(modeWest?"ct'":"x'",plt.x+8,plt.y+12);
