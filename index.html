@@ -14,14 +14,20 @@
         input[type="range"] { flex: 1; accent-color: #bb86fc; }
         .btn { background: #bb86fc; color: #121214; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
         .btn:hover { background: #d0a3ff; }
+        .btn-toggle { background: #3d3d45; color: #f5f5fa; border: 1px solid #555; margin-left: 10px; }
+        .btn-active { background: #ffeb3b !important; color: #121214 !important; border: 1px solid #ffeb3b; }
         .legend { display: flex; gap: 15px; justify-content: center; margin: 10px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 12px; font-weight: bold; }
         .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; vertical-align: middle; }
     </style>
 </head>
 <body>
 <div class="box">
-    <div style="display:flex; justify-content: center; margin-bottom: 10px;">
+    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
         <h3 style="margin:0;">Minkowski Spacetime Vector Engine</h3>
+        <div>
+            <button class="btn btn-toggle btn-active" id="mW">Relativity (ct vertical)</button>
+            <button class="btn btn-toggle" id="mE">Particle Physics (ct horizontal)</button>
+        </div>
     </div>
     <div class="plots">
         <div style="text-align:center;"><div>Diagram (a): Spacetime Map (Laboratory Frame S)</div><canvas id="map" width="410" height="410"></canvas></div>
@@ -38,13 +44,13 @@
     <div class="controls">
         <div class="row"><label>Particle Velocity (v/c):</label><input type="range" id="vS" min="-0.95" max="0.95" step="0.01" value="0.34"><span id="vL" style="font-family:monospace;width:40px;">0.34</span></div>
         <div class="row" style="color:#ff9100;"><label>Frame Boost (&beta;_f):</label><input type="range" id="bS" min="-0.90" max="0.90" step="0.01" value="0.00"><span id="bL" style="font-family:monospace;width:40px;">0.00</span></div>
-        <div class="row" style="color:#4caf50;"><label>Acceleration (&alpha;):</label><input type="range" id="aS" min="-1.50" max="1.50" step="0.05" value="0.50"><span id="aL" style="font-family:monospace;width:40px;">0.50</span></div>
+        <div class="row" style="color:#4caf50;"><label>Proper Acceleration (&alpha;):</label><input type="range" id="aS" min="-1.50" max="1.50" step="0.05" value="0.50"><span id="aL" style="font-family:monospace;width:40px;">0.50</span></div>
         <div class="row"><label>Zoom Scale:</label><input type="range" id="sS" min="60" max="180" step="5" value="110"><span id="sL" style="font-family:monospace;width:40px;">110</span></div>
         <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #444; padding-top:8px; margin-top:8px; font-family:monospace; font-size:14px; line-height: 1.5;">
             <div>
                 <div>&gamma;: <span id="gV" style="color:#bb86fc">1.06</span> | Accel: <span id="gfV" style="color:#4caf50;font-weight:bold">0.50g</span> | &rho;: <span id="rV" style="color:#ffeb3b;font-weight:bold">2.00</span></div>
                 <div>U': <span id="uV" style="color:#03dac6"></span> | A': <span id="aV" style="color:#4caf50"></span></div>
-                <div style="color:#ffeb3b;font-weight:bold;">Dot Product (U' &middot; A') = +U'⁰A'⁰ - U'¹A'¹ = <span id="dP">0.000</span></div>
+                <div style="color:#ffeb3b;font-weight:bold;"><span id="dPE">Dot Product (U' &middot; A') = +U'⁰A'⁰ - U'¹A'¹</span> = <span id="dP">0.000</span></div>
             </div>
             <button class="btn" id="rB">Reset Layout</button>
         </div>
