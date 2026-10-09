@@ -13,12 +13,20 @@ function arr(ctx,t1,x1,t2,x2,cl,w,lb=""){
 }
 function grid(ctx,S,bf,isMap){
     ctx.clearRect(0,0,W,H);
-    let activeBf = isMap ? 0 : -bf;
-    for(let i=-12; i<=12; i++){
-        let l1=bst(-12,i,activeBf),l2=bst(12,i,activeBf),l3=bst(i,-12,activeBf),l4=bst(i,12,activeBf);
-        let p1=mapCoord(l1.tP*S,l1.xP*S),p2=mapCoord(l2.tP*S,l2.xP*S);
-        let p3=mapCoord(l3.tP*S,l3.xP*S),p4=mapCoord(l4.tP*S,l4.xP*S);
-        ln(ctx,p1.x,p1.y,p2.x,p2.y,"#444452",1.5);ln(ctx,p3.x,p3.y,p4.x,p4.y,"#444452",1.5);
+    if(isMap){
+        for(let i=-12; i<=12; i++){
+            let p1=mapCoord(-12*S,i*S),p2=mapCoord(12*S,i*S);
+            let p3=mapCoord(i*S,-12*S),p4=mapCoord(i*S,12*S);
+            ln(ctx,p1.x,p1.y,p2.x,p2.y,"#444452",1.5);ln(ctx,p3.x,p3.y,p4.x,p4.y,"#444452",1.5);
+        }
+    }else {
+        // FIXED SHEAR GEOMETRY: Grid background transforms strictly using frame boost (-bf) to match principal axes
+        for(let i=-12; i<=12; i++){
+            let l1=bst(-12,i,-bf),l2=bst(12,i,-bf),l3=bst(i,-12,-bf),l4=bst(i,12,-bf);
+            let p1=mapCoord(l1.tP*S,l1.xP*S),p2=mapCoord(l2.tP*S,l2.xP*S);
+            let p3=mapCoord(l3.tP*S,l3.xP*S),p4=mapCoord(l4.tP*S,l4.xP*S);
+            ln(ctx,p1.x,p1.y,p2.x,p2.y,"#444452",1.5);ln(ctx,p3.x,p3.y,p4.x,p4.y,"#444452",1.5);
+        }
     }
     let pOrigin=mapCoord(0,0);
     ln(ctx,0,pOrigin.y,W,pOrigin.y,"#fff",2);ln(ctx,pOrigin.x,0,pOrigin.x,H,"#fff",2);
@@ -38,18 +46,16 @@ function grid(ctx,S,bf,isMap){
     ln(ctx,cone2_p1.x,cone2_p1.y,cone2_p2.x,cone2_p2.y,"#fbc02d",1.5);
     
     if(!isMap){
-        // FIXED SCALE-INVARIANT AXIS CLIP LOOPS: Always traces the full length of the canvas view limits
         let x_axis_end = bst(0, 24, -bf), t_axis_end = bst(24, 0, -bf);
         let p_x2=mapCoord(x_axis_end.tP*S, x_axis_end.xP*S), p_t2=mapCoord(t_axis_end.tP*S, t_axis_end.xP*S);
         ln(ctx,pOrigin.x,pOrigin.y,p_x2.x,p_x2.y,"#9999a8",2.5);ln(ctx,pOrigin.x,pOrigin.y,p_t2.x,p_t2.y,"#9999a8",2.5);
         
-        // FIXED ANCHOR LABELS: Constrains placement near stable canvas corners so they stay visible at high zoom scales
         ctx.fillStyle="#fbc02d";ctx.font="bold 13px sans-serif";
         let signX = bf >= 0 ? 1 : -1;
-        let lblX_x = modeWest ? (W - 35) : (W - 35);
+        let lblX_x = W - 35;
         let lblX_y = modeWest ? (pOrigin.y - 12 - signX*15) : (pOrigin.y - 25);
         let lblT_x = modeWest ? (pOrigin.x + 8 + signX*25) : (pOrigin.x + 8);
-        let lblT_y = modeWest ? 32 : 32;
+        let lblT_y = 32;
         
         ctx.fillText(modeWest?"x'":"ct'", lblX_x, lblX_y);
         ctx.fillText(modeWest?"ct'":"x'", lblT_x, lblT_y);
@@ -62,6 +68,7 @@ function run(){
     let u0=1,u1=0,a0=0,a1=0;const g0=1/Math.sqrt(1-v*v);
     if(!isZeroA){let p_t=g0*v+a*targetT;let g_t=Math.sqrt(1+p_t*p_t);u0=g_t;u1=p_t;a0=a*u1;a1=a*u0;}else{u0=g0;u1=g0*v;}
     
+    const bU=bst(u0,u1,bf),bA=bst(a0,a1,bf);
     document.getElementById('gV').innerText=u0.toFixed(2);
     document.getElementById('uV').innerText="("+u0.toFixed(2)+"c, "+u1.toFixed(2)+"c)";document.getElementById('aV').innerText="("+a0.toFixed(2)+"a, "+a1.toFixed(2)+"a)";
     const dP=u0*a0-u1*a1;document.getElementById('dP').innerText=Math.abs(dP)<1e-10?"0.000":dP.toFixed(3);
@@ -101,7 +108,6 @@ function run(){
     }
     cG.stroke();
     
-    // FIXED MASS SHELL ANCHOR: Stays cleanly nested on screen relative to canvas center
     let bShellLbl=bst(Math.cosh(0.8),Math.sinh(0.8),0);let pLbl=mapCoord(bShellLbl.tP*S,bShellLbl.xP*S);
     pLbl.x = Math.max(30, Math.min(W - 60, pLbl.x)); pLbl.y = Math.max(30, Math.min(H - 30, pLbl.y));
     cG.fillStyle="#00f0ff";cG.font="bold 13px sans-serif";cG.fillText("U²=c²",pLbl.x+8,pLbl.y);
