@@ -5,32 +5,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Minkowski Spacetime Simulator</title>
     <style>
-        body { font-family: sans-serif; background: #121214; color: #f5f5fa; display: flex; flex-direction: column; align-items: center; padding: 8px; margin: 0; box-sizing: border-box; }
+        body { font-family: sans-serif; background: #121214; color: #f5f5fa; display: flex; flex-direction: column; align-items: center; padding: 8px; margin: 0; box-sizing: border-box; min-height: 100vh; }
         * { box-sizing: border-box; }
-        .box { background: #1e1e24; border-radius: 12px; padding: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); width: 100%; max-width: 920px; }
+        .box { background: #1e1e24; border-radius: 12px; padding: 12px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); width: 100%; max-width: 920px; display: flex; flex-direction: column; }
         .header-row { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; }
         @media(min-width: 600px) { .header-row { flex-direction: row; justify-content: space-between; align-items: center; } }
-        .plots { display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center; }
-        @media(min-width: 850px) { .plots { flex-direction: row; } }
+        .main-content { display: flex; flex-direction: column; width: 100%; }
+        @media(min-width: 850px) { .main-content { flex-direction: row; gap: 16px; } }
+        .plots-wrapper { flex: 1; display: flex; flex-direction: column; align-items: center; }
+        .plots { display: flex; flex-direction: column; gap: 12px; align-items: center; justify-content: center; width: 100%; }
+        @media(min-width: 550px) and (max-width: 849px) { .plots { flex-direction: row; } }
         .plot-container { text-align: center; width: 100%; max-width: 410px; }
         canvas { background: #0b0b0d; border-radius: 8px; border: 2px solid #3d3d45; width: 100%; height: auto; aspect-ratio: 1/1; }
-        .controls { margin-top: 12px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; font-size: 14px; }
-        .row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; padding: 4px 0; }
-        @media(min-width: 500px) { .row { flex-direction: row; align-items: center; gap: 10px; } }
+        .legend { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 11px; font-weight: bold; line-height: 1.4; width: 100%; max-width: 832px; }
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .dot { width: 10px; height: 12px; border-radius: 50%; display: inline-block; }
+        
+        /* RESPONSIVE CONTROL DECK: Docks to bottom on phones, displays side-by-side on desktop */
+        .controls { background: rgba(0,0,0,0.4); padding: 12px; border-radius: 8px; font-size: 13px; width: 100%; }
+        @media(max-width: 849px) { 
+            body { padding-bottom: 240px; } /* Prevent controls overlapping layout view */
+            .controls { position: fixed; bottom: 0; left: 0; right: 0; border-radius: 12px 12px 0 0; box-shadow: 0 -8px 24px rgba(0,0,0,0.6); background: #1e1e24; border-top: 2px solid #3d3d45; max-height: 235px; overflow-y: auto; z-index: 1000; padding: 12px 16px; } 
+        }
+        @media(min-width: 850px) { .controls { width: 340px; margin-top: 22px; height: fit-content; } }
+        
+        .row { display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; padding: 2px 0; }
+        @media(min-width: 420px) { .row { flex-direction: row; align-items: center; gap: 8px; } }
         .row label { font-weight: bold; width: 100%; }
-        @media(min-width: 500px) { .row label { width: 190px; } }
-        .slider-container { display: flex; align-items: center; gap: 10px; flex: 1; width: 100%; }
-        input[type="range"] { flex: 1; accent-color: #bb86fc; height: 38px; cursor: pointer; }
-        .slider-val { font-family: monospace; width: 40px; font-size: 14px; text-align: right; }
-        .btn { background: #bb86fc; color: #121214; border: none; padding: 10px 16px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 13px; transition: background 0.2s; min-height: 40px; }
+        @media(min-width: 420px) { .row label { width: 140px; } }
+        .slider-container { display: flex; align-items: center; gap: 8px; flex: 1; width: 100%; }
+        input[type="range"] { flex: 1; accent-color: #bb86fc; height: 32px; cursor: pointer; }
+        .slider-val { font-family: monospace; width: 35px; font-size: 13px; text-align: right; }
+        .btn { background: #bb86fc; color: #121214; border: none; padding: 8px 14px; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 12px; transition: background 0.2s; min-height: 36px; }
         .btn:hover { background: #d0a3ff; }
-        .btn-toggle { background: #3d3d45; color: #f5f5fa; border: 1px solid #555; margin-right: 6px; margin-bottom: 6px; }
+        .btn-toggle { background: #3d3d45; color: #f5f5fa; border: 1px solid #555; margin-right: 4px; margin-bottom: 4px; padding: 6px 12px; }
         .btn-active { background: #ffeb3b !important; color: #121214 !important; border: 1px solid #ffeb3b; }
-        .legend { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin: 12px 0; padding: 10px; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 12px; font-weight: bold; line-height: 1.6; }
-        .legend-item { display: flex; align-items: center; gap: 6px; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
-        .metrics-panel { display: flex; flex-direction: column; gap: 10px; border-top: 1px solid #444; padding-top: 10px; margin-top: 10px; font-family: monospace; font-size: 13px; line-height: 1.5; }
-        @media(min-width: 650px) { .metrics-panel { flex-direction: row; justify-content: space-between; align-items: flex-end; } }
+        .metrics-panel { border-top: 1px solid #444; padding-top: 8px; margin-top: 8px; font-family: monospace; font-size: 12px; line-height: 1.4; display: flex; flex-direction: column; gap: 6px; }
     </style>
 </head>
 <body>
@@ -43,57 +53,60 @@
         </div>
     </div>
     
-    <div class="plots">
-        <div class="plot-container"><div>Diagram (a): Spacetime Map (Laboratory Frame S)</div><canvas id="map" width="410" height="410"></canvas></div>
-        <div class="plot-container"><div>Diagram (b): Scale Gauge (Boosted Frame S')</div><canvas id="gauge" width="410" height="410"></canvas></div>
-    </div>
-    
-    <div class="legend">
-        <div class="legend-item"><span class="dot" style="background:#03dac6;"></span> U_static</div>
-        <div class="legend-item"><span class="dot" style="background:#cf6679;"></span> Worldline</div>
-        <div class="legend-item"><span class="dot" style="background:#bb86fc;"></span> U / U'</div>
-        <div class="legend-item"><span class="dot" style="background:#4caf50;"></span> A / A'</div>
-        <div class="legend-item"><span class="dot" style="background:#fbc02d;"></span> Light Cone</div>
-        <div class="legend-item"><span class="dot" style="background:#00f0ff;"></span> Mass Shell (U² = c²)</div>
-    </div>
+    <div class="main-content">
+        <div class="plots-wrapper">
+            <div class="plots">
+                <div class="plot-container"><div>Diagram (a): Spacetime Map (Laboratory Frame S)</div><canvas id="map" width="410" height="410"></canvas></div>
+                <div class="plot-container"><div>Diagram (b): Scale Gauge (Boosted Frame S')</div><canvas id="gauge" width="410" height="410"></canvas></div>
+            </div>
+            <div class="legend">
+                <div class="legend-item"><span class="dot" style="background:#03dac6;"></span> U_static</div>
+                <div class="legend-item"><span class="dot" style="background:#cf6679;"></span> Worldline</div>
+                <div class="legend-item"><span class="dot" style="background:#bb86fc;"></span> U / U'</div>
+                <div class="legend-item"><span class="dot" style="background:#4caf50;"></span> A / A'</div>
+                <div class="legend-item"><span class="dot" style="background:#fbc02d;"></span> Light Cone</div>
+                <div class="legend-item"><span class="dot" style="background:#00f0ff;"></span> Mass Shell (U² = c²)</div>
+            </div>
+        </div>
 
-    <div class="controls">
-        <div class="row">
-            <label>Particle Velocity (v/c):</label>
-            <div class="slider-container">
-                <input type="range" id="vS" min="-0.95" max="0.95" step="0.01" value="0.34">
-                <span id="vL" class="slider-val">0.34</span>
+        <div class="controls">
+            <div class="row">
+                <label>Velocity (v/c):</label>
+                <div class="slider-container">
+                    <input type="range" id="vS" min="-0.95" max="0.95" step="0.01" value="0.34">
+                    <span id="vL" class="slider-val">0.34</span>
+                </div>
             </div>
-        </div>
-        <div class="row" style="color:#ff9100;">
-            <label>Frame Boost (&beta;_f):</label>
-            <div class="slider-container">
-                <input type="range" id="bS" min="-0.90" max="0.90" step="0.01" value="0.00">
-                <span id="bL" class="slider-val">0.00</span>
+            <div class="row" style="color:#ff9100;">
+                <label>Frame Boost (&beta;_f):</label>
+                <div class="slider-container">
+                    <input type="range" id="bS" min="-0.90" max="0.90" step="0.01" value="0.00">
+                    <span id="bL" class="slider-val">0.00</span>
+                </div>
             </div>
-        </div>
-        <div class="row" style="color:#4caf50;">
-            <label>Proper Acceleration (&alpha;):</label>
-            <div class="slider-container">
-                <input type="range" id="aS" min="-1.50" max="1.50" step="0.05" value="0.50">
-                <span id="aL" class="slider-val">0.50</span>
+            <div class="row" style="color:#4caf50;">
+                <label>Acceleration (&alpha;):</label>
+                <div class="slider-container">
+                    <input type="range" id="aS" min="-1.50" max="1.50" step="0.05" value="0.50">
+                    <span id="aL" class="slider-val">0.50</span>
+                </div>
             </div>
-        </div>
-        <div class="row">
-            <label>Zoom Scale:</label>
-            <div class="slider-container">
-                <input type="range" id="sS" min="60" max="180" step="5" value="110">
-                <span id="sL" class="slider-val">110</span>
+            <div class="row">
+                <label>Zoom Scale:</label>
+                <div class="slider-container">
+                    <input type="range" id="sS" min="60" max="180" step="5" value="110">
+                    <span id="sL" class="slider-val">110</span>
+                </div>
             </div>
-        </div>
-        
-        <div class="metrics-panel">
-            <div>
-                <div>&gamma;: <span id="gV" style="color:#bb86fc">1.06</span> | Accel: <span id="gfV" style="color:#4caf50;font-weight:bold">0.50g</span> | &rho;: <span id="rV" style="color:#ffeb3b;font-weight:bold">2.00</span></div>
-                <div style="margin: 3px 0;">U': <span id="uV" style="color:#03dac6"></span> | A': <span id="aV" style="color:#4caf50"></span></div>
-                <div style="color:#ffeb3b;font-weight:bold;"><span id="dPE">Dot Product (U' &middot; A') = +U'⁰A'⁰ - U'¹A'¹</span> = <span id="dP">0.000</span></div>
+            
+            <div class="marics-wrapper" style="border-top:1px solid #444; padding-top:6px; margin-top:6px;">
+                <button class="btn" id="rB" style="width: 100%; margin-bottom: 6px;">Reset Layout</button>
+                <div class="metrics-panel">
+                    <div>&gamma;: <span id="gV" style="color:#bb86fc">1.06</span> | Accel: <span id="gfV" style="color:#4caf50;font-weight:bold">0.50g</span> | &rho;: <span id="rV" style="color:#ffeb3b;font-weight:bold">2.00</span></div>
+                    <div>U': <span id="uV" style="color:#03dac6"></span> | A': <span id="aV" style="color:#4caf50"></span></div>
+                    <div style="color:#ffeb3b;font-weight:bold; font-size:11px;"><span id="dPE">Dot Product (U' &middot; A') = +U'⁰A'⁰ - U'¹A'¹</span> = <span id="dP">0.000</span></div>
+                </div>
             </div>
-            <button class="btn" id="rB" style="width: 100%; max-width: 160px; margin-top: 8px;">Reset Layout</button>
         </div>
     </div>
 </div>
@@ -107,4 +120,3 @@
 </script>
 </body>
 </html>
-
