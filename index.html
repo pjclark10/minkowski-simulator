@@ -5,148 +5,56 @@
     <title>Minkowski Spacetime Simulator</title>
     <style>
         body { font-family: sans-serif; background: #121214; color: #f5f5fa; display: flex; flex-direction: column; align-items: center; padding: 10px; }
-        .box { background: #1e1e24; border-radius: 12px; padding: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); }
+        .box { background: #1e1e24; border-radius: 12px; padding: 15px; box-shadow: 0 8px 32px rgba(0,0,0,0.5); width: 100%; max-width: 920px; }
         .plots { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; }
         canvas { background: #0b0b0d; border-radius: 8px; border: 2px solid #3d3d45; }
         .controls { margin-top: 15px; background: rgba(0,0,0,0.3); padding: 12px; border-radius: 8px; font-size: 13px; }
         .row { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
         .row label { width: 180px; font-weight: bold; }
         input[type="range"] { flex: 1; accent-color: #bb86fc; }
+        .btn { background: #bb86fc; color: #121214; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px; }
+        .btn-toggle { background: #3d3d45; color: #f5f5fa; border: 1px solid #555; margin-left: 10px; }
+        .btn-active { background: #ffeb3b !important; color: #121214 !important; border: 1px solid #ffeb3b; }
+        .legend { display: flex; gap: 15px; justify-content: center; margin: 10px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 12px; font-weight: bold; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; vertical-align: middle; }
     </style>
 </head>
 <body>
 <div class="box">
+    <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h3 style="margin:0;">Minkowski Spacetime Vector Engine</h3>
+        <div>
+            <button class="btn btn-toggle btn-active" id="mW">Relativity (+ - - -)</button>
+            <button class="btn btn-toggle" id="mE">Particle Physics (- + + +)</button>
+        </div>
+    </div>
     <div class="plots">
-        <div style="text-align:center;"><div>Diagram (a): Spacetime Map (Rest Paths)</div><canvas id="map" width="420" height="420"></canvas></div>
-        <div style="text-align:center;"><div>Diagram (b): Scale Gauge (Boosted Frame)</div><canvas id="gauge" width="420" height="420"></canvas></div>
+        <div style="text-align:center;"><div>Diagram (a): Spacetime Map (Rest Paths)</div><canvas id="map" width="410" height="410"></canvas></div>
+        <div style="text-align:center;"><div>Diagram (b): Scale Gauge (Boosted Frame)</div><canvas id="gauge" width="410" height="410"></canvas></div>
+    </div>
+    <div class="legend">
+        <div><span class="dot" style="background:#03dac6;"></span> U_static</div>
+        <div><span class="dot" style="background:#cf6679;"></span> Worldline</div>
+        <div><span class="dot" style="background:#bb86fc;"></span> U / U'</div>
+        <div><span class="dot" style="background:#4caf50;"></span> A / A'</div>
+        <div><span class="dot" style="background:#fbc02d;"></span> Light Cone</div>
+        <div><span class="dot" style="background:#00f0ff;"></span> Mass Shell (<span id="lShell">U² = c²</span>)</div>
     </div>
     <div class="controls">
-        <div class="row"><label>Particle Velocity (v/c):</label><input type="range" id="vS" min="-0.95" max="0.95" step="0.01" value="0.34"></div>
-        <div class="row" style="color:#ff9100;"><label>Frame Boost &beta;_f:</label><input type="range" id="bS" min="-0.90" max="0.90" step="0.01" value="0.00"></div>
-        <div class="row" style="color:#4caf50;"><label>Proper Acceleration (&alpha;):</label><input type="range" id="aS" min="-1.50" max="1.50" step="0.05" value="0.50"></div>
-        <div class="row"><label>Zoom Scale:</label><input type="range" id="sS" min="60" max="180" step="5" value="110"></div>
-        <div style="font-family:monospace; border-top:1px solid #444; padding-top:8px; margin-top:8px; font-size:14px; line-height: 1.5;">
-            <div>&gamma;: <span id="gV" style="color:#bb86fc">1.06</span> | Acceleration: <span id="gForceVal" style="color:#4caf50; font-weight:bold;">0.50g</span> | Curvature Radius (&rho;): <span id="rhoVal" style="color:#ffeb3b; font-weight:bold;">2.00</span></div>
-            <div>Boosted U'&mu;: <span id="uV" style="color:#03dac6"></span> | Boosted A'&mu;: <span id="aV" style="color:#4caf50"></span></div>
-            <div style="color:#ffeb3b; font-weight:bold; margin-top:4px;">Spacetime Dot Product (U' &middot; A') = +U'⁰A'⁰ - U'¹A'¹ = <span id="dotProdVal">0.000</span></div>
+        <div class="row"><label>Velocity (v/c):</label><input type="range" id="vS" min="-0.95" max="0.95" step="0.01" value="0.34"><span id="vL" style="font-family:monospace;width:40px;">0.34</span></div>
+        <div class="row" style="color:#ff9100;"><label>Frame Boost (&beta;_f):</label><input type="range" id="bS" min="-0.90" max="0.90" step="0.01" value="0.00"><span id="bL" style="font-family:monospace;width:40px;">0.00</span></div>
+        <div class="row" style="color:#4caf50;"><label>Acceleration (&alpha;):</label><input type="range" id="aS" min="-1.50" max="1.50" step="0.05" value="0.50"><span id="aL" style="font-family:monospace;width:40px;">0.50</span></div>
+        <div class="row"><label>Zoom Scale:</label><input type="range" id="sS" min="60" max="180" step="5" value="110"><span id="sL" style="font-family:monospace;width:40px;">110</span></div>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-top:1px solid #444; padding-top:8px; margin-top:8px; font-family:monospace; font-size:14px; line-height: 1.5;">
+            <div>
+                <div>&gamma;: <span id="gV" style="color:#bb86fc">1.06</span> | Accel: <span id="gfV" style="color:#4caf50;font-weight:bold">0.50g</span> | &rho;: <span id="rV" style="color:#ffeb3b;font-weight:bold">2.00</span></div>
+                <div>U': <span id="uV" style="color:#03dac6"></span> | A': <span id="aV" style="color:#4caf50"></span></div>
+                <div style="color:#ffeb3b;font-weight:bold;"><span id="dPE">Dot Product (U' &middot; A') = +U'⁰A'⁰ - U'¹A'¹</span> = <span id="dP">0.000</span></div>
+            </div>
+            <button class="btn" id="rB">Reset Layout</button>
         </div>
     </div>
 </div>
-<script>
-    const sV=document.getElementById('vS'),sB=document.getElementById('bS'),sA=document.getElementById('aS'),sS=document.getElementById('sS');
-    const cM=document.getElementById('map').getContext('2d'),cG=document.getElementById('gauge').getContext('2d');
-    const W=420, H=420, OX=210, OY=370;
-
-    function bst(t, x, b) {
-        let g = 1 / Math.sqrt(1 - b*b);
-        return { tP: g * (t - b * x), xP: g * (x - b * t) };
-    }
-    function arr(ctx, x1, y1, x2, y2, cl, w, lb="") {
-        ctx.strokeStyle = cl; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
-        let an = Math.atan2(y2-y1, x2-x1), len = 10;
-        ctx.fillStyle = cl; ctx.beginPath(); ctx.moveTo(x2, y2);
-        ctx.lineTo(x2 - len*Math.cos(an - 0.5), y2 - len*Math.sin(an - 0.5));
-        ctx.lineTo(x2 - len*Math.cos(an + 0.5), y2 - len*Math.sin(an + 0.5)); ctx.fill();
-        if (lb) { ctx.font = "bold 14px sans-serif"; ctx.fillText(lb, x2 + 12*Math.cos(an), y2 + 12*Math.sin(an) + 4); }
-    }
-    function drawGrid(ctx, S, bf, isMapPlot) {
-        ctx.clearRect(0,0,W,H); ctx.strokeStyle = "#444452"; ctx.lineWidth = 1.5;
-        for(let i=-12; i<=12; i++) {
-            let l1 = bst(-12, i, bf), l2 = bst(12, i, bf);
-            ctx.beginPath(); ctx.moveTo(OX + l1.xP*S, OY - l1.tP*S); ctx.lineTo(OX + l2.xP*S, OY - l2.tP*S); ctx.stroke();
-            let l3 = bst(i, -12, bf), l4 = bst(i, 12, bf);
-            ctx.beginPath(); ctx.moveTo(OX + l3.xP*S, OY - l3.tP*S); ctx.lineTo(OX + l4.xP*S, OY - l4.tP*S); ctx.stroke();
-        }
-        ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.moveTo(0, OY); ctx.lineTo(W, OY); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(OX, 0); ctx.lineTo(OX, H); ctx.stroke();
-        
-        ctx.fillStyle = "#2a2a35";
-        ctx.fillRect(W-30, OY-22, 24, 18); ctx.fillRect(OX-25, 4, 22, 18);
-        ctx.strokeStyle = "#ffffff"; ctx.lineWidth = 1;
-        ctx.strokeRect(W-30, OY-22, 24, 18); ctx.strokeRect(OX-25, 4, 22, 18);
-        ctx.fillStyle = "#ffffff"; ctx.font = "bold 12px sans-serif";
-        ctx.fillText("x", W-23, OY-9); ctx.fillText("ct", OX-20, 17);
-
-        ctx.strokeStyle = "rgba(251,192,45,0.6)"; ctx.lineWidth = 1.5;
-        ctx.beginPath(); ctx.moveTo(OX, OY); ctx.lineTo(OX+450, OY-450); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(OX, OY); ctx.lineTo(OX-340, OY-340); ctx.stroke();
-
-        if (!isMapPlot) {
-            ctx.strokeStyle = "#9999a8"; ctx.lineWidth = 2.5;
-            let x1 = bst(0,-8,bf), x2 = bst(0,8,bf), t1 = bst(-4,0,bf), t2 = bst(8,0,bf);
-            ctx.beginPath(); ctx.moveTo(OX+x1.xP*S, OY-x1.tP*S); ctx.lineTo(OX+x2.xP*S, OY-x2.tP*S); ctx.stroke();
-            ctx.beginPath(); ctx.moveTo(OX+t1.xP*S, OY-t1.tP*S); ctx.lineTo(OX+t2.xP*S, OY-t2.tP*S); ctx.stroke();
-            ctx.fillStyle = "#fbc02d"; ctx.font = "bold 13px sans-serif";
-            let labelX = bst(0, 1.8, bf), labelT = bst(3.2, 0, bf);
-            ctx.fillText("x'", OX + labelX.xP*S, OY - labelX.tP*S - 8);
-            ctx.fillText("ct'", OX + labelT.xP*S + 8, OY - labelT.tP*S);
-        }
-    }
-    function run() {
-        const v = parseFloat(sV.value), a = parseFloat(sA.value), S = parseInt(sS.value), bf = parseFloat(sB.value);
-        drawGrid(cM, S, 0, true); drawGrid(cG, S, bf, false); 
-        const g = 1 / Math.sqrt(1 - v*v);
-        document.getElementById('gV').innerText = g.toFixed(2);
-        document.getElementById('gForceVal').innerText = a.toFixed(2) + "g";
-        const isZeroA = Math.abs(a) < 0.01;
-        document.getElementById('rhoVal').innerText = isZeroA ? "Infinity" : (1 / Math.abs(a)).toFixed(2);
-
-        const targetT = 1.5;
-        let u0 = g, u1 = g * v, a0 = 0, a1 = 0;
-
-        if (!isZeroA) {
-            let v_t = (v + a * targetT) / (1 + v * a * targetT);
-            if (v_t > 0.99) v_t = 0.99; if (v_t < -0.99) v_t = -0.99;
-            let g_t = 1 / Math.sqrt(1 - v_t * v_t);
-            u0 = g_t; u1 = g_t * v_t; a0 = Math.pow(g_t, 4) * a * v_t; a1 = Math.pow(g_t, 4) * a;
-        }
-
-        const bU = bst(u0, u1, bf), bA = bst(a0, a1, bf); 
-        document.getElementById('uV').innerText = "(" + bU.tP.toFixed(2) + "c, " + bU.xP.toFixed(2) + "c)";
-        document.getElementById('aV').innerText = "(" + bA.tP.toFixed(2) + "a, " + bA.xP.toFixed(2) + "a)";
-        const dotProd = bU.tP * bA.tP - bU.xP * bA.xP;
-        document.getElementById('dotProdVal').innerText = Math.abs(dotProd) < 1e-10 ? "0.000" : dotProd.toFixed(3);
-
-        cM.strokeStyle = "#03dac6"; cM.lineWidth = 2.5; cM.beginPath(); cM.moveTo(OX, 0); cM.lineTo(OX, H); cM.stroke();
-        arr(cM, OX, OY - 1.5*S, OX, OY - 2.5*S, "#03dac6", 2.5);
-
-        let px = OX, py = OY;
-        if (isZeroA) {
-            cM.strokeStyle = "#cf6679"; cM.lineWidth = 3; cM.beginPath();
-            cM.moveTo(OX - (v * 0.5)*S, OY + 0.5*S); cM.lineTo(OX + (v * 4.5)*S, OY - 4.5*S); cM.stroke();
-            px = OX + (v * targetT) * S; py = OY - targetT * S;
-        } else {
-            cM.strokeStyle = "#cf6679"; cM.lineWidth = 3; cM.beginPath();
-            const absA = Math.abs(a), trajectorySign = a >= 0 ? 1 : -1;
-            for(let t_grid = -0.5; t_grid <= 4.5; t_grid += 0.02) {
-                let dx = (Math.sqrt(1 + Math.pow(g * a * t_grid + g * v, 2)) - g) / a;
-                if(t_grid === -0.5) cM.moveTo(OX + dx * S, OY - t_grid * S); else cM.lineTo(OX + dx * S, OY - t_grid * S);
-            }
-            cM.stroke();
-            let targetX = (Math.sqrt(1 + Math.pow(g * a * targetT + g * v, 2)) - g) / a;
-            px = OX + targetX * S; py = OY - targetT * S;
-        }
-
-        cM.fillStyle = "#fff"; cM.beginPath(); cM.arc(px, py, 5, 0, 2*Math.PI); cM.fill();
-        arr(cM, px, py, px + u1 * S * 0.4, py - u0 * S * 0.4, "#bb86fc", 3.5, "U");
-        if (!isZeroA) {
-            let scaleFactorM = 25 / Math.abs(a1); 
-            arr(cM, px, py, px + a1*S*scaleFactorM*0.015, py - a0*S*scaleFactorM*0.015, "#4caf50", 3.5, "A");
-        }
-
-        cG.strokeStyle = "#d0a3ff"; cG.lineWidth = 2.5; cG.beginPath();
-        for(let xi=-3.0; xi<=3.0; xi+=0.04) {
-            let bShell = bst(Math.cosh(xi), Math.sinh(xi), bf);
-            if(xi===-3.0) cG.moveTo(OX+bShell.xP*S, OY-bShell.tP*S); else cG.lineTo(OX+bShell.xP*S, OY-bShell.tP*S);
-        }
-        cG.stroke();
-        let bStatic = bst(1, 0, bf);
-        arr(cG, OX, OY, OX + bStatic.xP*S, OY - bStatic.tP*S, "#03dac6", 2.5);
-        arr(cG, OX, OY, OX + bU.xP*S, OY - bU.tP*S, "#bb86fc", 3.5, "U'");
-        if (!isZeroA) arr(cG, OX, OY, OX + bA.xP*S*0.4, OY - bA.tP*S*0.4, "#4caf50", 3.5, "A'");
-    }
-    [sV, sB, sA, sS].forEach(s => s.addEventListener('input', run)); run();
-</script>
+<script src="script.js"></script>
 </body>
 </html>
