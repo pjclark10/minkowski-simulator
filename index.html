@@ -19,9 +19,14 @@
         @media(min-width: 550px) and (max-width: 849px) { .plots { flex-direction: row; align-items: flex-start; } }
         .plot-container { text-align: center; width: 100%; max-width: 410px; }
         
-        /* MOBILE TOUCH SCROLL PASS-THROUGH FIX */
-        canvas { background: #0b0b0d; border-radius: 8px; border: 2px solid #3d3d45; width: 100%; height: auto; aspect-ratio: 1/1; display: block; pointer-events: none; }
-        .canvas-touch-wrapper { width: 100%; height: auto; pointer-events: auto; }
+        /* HARDWARE-ACCELERATED HIGH-DPI CANVAS LAYERING */
+        .canvas-touch-wrapper { width: 100%; height: auto; position: relative; }
+        canvas { background: #0b0b0d; border-radius: 8px; border: 2px solid #3d3d45; width: 100%; height: auto; aspect-ratio: 1/1; display: block; image-rendering: -webkit-optimize-contrast; image-rendering: crisp-edges; }
+        
+        /* INVISIBLE MOBILE CURTAIN: Blocks drag captures on phones only, keeping desktop scaling crisp */
+        @media(max-width: 849px) {
+            .canvas-touch-wrapper::after { content: ""; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: transparent; z-index: 5; pointer-events: none; }
+        }
         
         .legend { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin: 8px 0; padding: 8px; background: rgba(255,255,255,0.05); border-radius: 6px; font-size: 11px; font-weight: bold; line-height: 1.4; width: 100%; max-width: 832px; }
         .legend-item { display: flex; align-items: center; gap: 4px; }
