@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#020617"/>
+      <stop offset="100%" stop-color="#0b1329"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="8" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+  
+  <!-- Background Squircle -->
+  <rect width="512" height="512" rx="112" fill="url(#bg)" />
+  
+  <!-- Subtle Grid Lines -->
+  <path d="M128 0 V512 M256 0 V512 M384 0 V512 M0 128 H512 M0 256 H512 M0 384 H512" stroke="#1e293b" stroke-width="2" opacity="0.4"/>
+
+  <!-- Light Cones (Yellow 45° Dashed Diagonals) -->
+  <g stroke="#eab308" stroke-width="4" stroke-dasharray="12,8" opacity="0.85">
+    <line x1="64" y1="64" x2="448" y2="448" />
+    <line x1="64" y1="448" x2="448" y2="64" />
+  </g>
+  
+  <!-- Subtle Light Cone Interior Glow -->
+  <polygon points="256,256 64,64 448,64" fill="#eab308" opacity="0.03"/>
+  <polygon points="256,256 64,448 448,448" fill="#eab308" opacity="0.03"/>
+
+  <!-- Standard Laboratory Axes (ct and x) -->
+  <line x1="256" y1="464" x2="256" y2="48" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+  <line x1="48" y1="256" x2="464" y2="256" stroke="#64748b" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Boosted Frame Skewed Axes (Cyan ct' & Violet x') -->
+  <line x1="256" y1="48" x2="312" y2="464" stroke="#06b6d4" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+  <line x1="48" y1="312" x2="464" y2="200" stroke="#8b5cf6" stroke-width="3" stroke-linecap="round" opacity="0.8"/>
+
+  <!-- Hyperbolic Proper Acceleration Worldline (Orange Rindler Horizon curve) -->
+  <path d="M 130 448 Q 236 280 256 256 Q 276 280 382 448" fill="none" stroke="#f97316" stroke-width="6" stroke-linecap="round" filter="url(#glow)"/>
+  <path d="M 130 448 Q 236 280 256 256 Q 276 280 382 448" fill="none" stroke="#fb923c" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Origin Event Point -->
+  <circle cx="256" cy="256" r="7" fill="#22d3ee" stroke="#020617" stroke-width="2"/>
+</svg>
