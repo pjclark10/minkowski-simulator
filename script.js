@@ -7,6 +7,22 @@ const ASSETS_TO_CACHE = [
   './icon-512.png'
 ];
 
+function setupCanvas(canvasId) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext('2d');
+    const dpr = window.devicePixelRatio || 1;
+    const rect = canvas.getBoundingClientRect();
+    
+    // Fallback to clientWidth/clientHeight if rect hasn't painted yet
+    const width = rect.width > 0 ? rect.width : (canvas.parentElement.clientWidth || 300);
+    const height = rect.height > 0 ? rect.height : (canvas.parentElement.clientHeight || 400);
+    
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    ctx.scale(dpr, dpr);
+    
+    return { ctx, width, height };
+}
 // Install event - cache core assets
 self.addEventListener('install', (event) => {
   event.waitUntil(
